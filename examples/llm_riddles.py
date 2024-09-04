@@ -24,7 +24,7 @@ class LLMRiddles(Agent):
         *_, last = self.examiner_agent.run([Message('user', '开始')])
         self.topics = json5.loads(last[-1].content)
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         return self._call_llm(messages=messages)
 
 

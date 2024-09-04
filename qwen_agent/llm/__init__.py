@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Optional
 
 from .base import LLM_REGISTRY, BaseChatModel, ModelServiceError
@@ -31,6 +32,13 @@ def get_chat_model(cfg: Optional[Dict] = None) -> BaseChatModel:
         LLM object.
     """
     cfg = cfg or {}
+    cfg = {
+        "api_key": os.environ.get("OPENAI_API_KEY", ""),
+        "model_server": os.environ.get("OPENAI_BASE_URL", "dashscope"),
+        "model": os.environ.get("OPENAI_MODEL", ""),
+        **cfg
+    }
+
     if 'model_type' in cfg:
         model_type = cfg['model_type']
         if model_type in LLM_REGISTRY:

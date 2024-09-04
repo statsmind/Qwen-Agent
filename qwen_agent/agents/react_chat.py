@@ -1,9 +1,11 @@
+import copy
 import json
 from typing import Dict, Iterator, List, Literal, Optional, Tuple, Union
 
+from qwen_agent.agents.doc_qa.basic_doc_qa import PROMPT_TEMPLATE
 from qwen_agent.agents.fncall_agent import FnCallAgent
 from qwen_agent.llm import BaseChatModel
-from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, Message
+from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, Message, ContentItem, CONTENT, ROLE, SYSTEM
 from qwen_agent.settings import MAX_LLM_CALL_PER_RUN
 from qwen_agent.tools import BaseTool
 from qwen_agent.utils.utils import format_as_text_message, merge_generate_cfgs
@@ -56,8 +58,12 @@ class ReActChat(FnCallAgent):
             new_generate_cfg={'stop': ['Observation:', 'Observation:\n']},
         )
 
-    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         text_messages = self._prepend_react_prompt(messages, lang=lang)
+        if text_messages[0].role == ASSISTANT:
+            text_messages = text_messages[1:]
+
+        text_messages[-1].content = [ContentItem(text=text_messages[-1].content)]
 
         num_llm_calls_available = MAX_LLM_CALL_PER_RUN
         response: str = 'Thought: '
@@ -80,17 +86,32 @@ class ReActChat(FnCallAgent):
 
             # Add the tool result
             observation = self._call_tool(action, action_input, messages=messages, **kwargs)
+            if isinstance(observation, dict):
+                for file in observation['files']:
+                    text_messages[-1].content.append(ContentItem(file=file))
+
+                *_, last = self.mem.run(messages=text_messages, **kwargs)
+                knowledge = last[-1][CONTENT]
+
+                system_prompt = PROMPT_TEMPLATE[lang].format(ref_doc=knowledge)
+                if text_messages[0][ROLE] == SYSTEM:
+                    text_messages[0][CONTENT] += '\n\n' + system_prompt
+                else:
+                    text_messages.insert(0, Message(SYSTEM, system_prompt))
+
+                observation = f"搜索到{len(observation[1])}条资讯，已存入知识库中"
+
             observation = f'\nObservation: {observation}\nThought: '
             response += observation
             yield [Message(role=ASSISTANT, content=response)]
 
-            if (not text_messages[-1].content.endswith('\nThought: ')) and (not thought.startswith('\n')):
+            if (not text_messages[-1].content[0].text.endswith('\nThought: ')) and (not thought.startswith('\n')):
                 # Add the '\n' between '\nQuestion:' and the first 'Thought:'
-                text_messages[-1].content += '\n'
+                text_messages[-1].content[0].text += '\n'
             if action_input.startswith('```'):
                 # Add a newline for proper markdown rendering of code
                 action_input = '\n' + action_input
-            text_messages[-1].content += thought + f'\nAction: {action}\nAction Input: {action_input}' + observation
+            text_messages[-1].content[0].text += thought + f'\nAction: {action}\nAction Input: {action_input}' + observation
 
     def _prepend_react_prompt(self, messages: List[Message], lang: Literal['en', 'zh']) -> List[Message]:
         tool_descs = []

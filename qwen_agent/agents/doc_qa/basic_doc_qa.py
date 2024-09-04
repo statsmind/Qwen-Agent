@@ -42,7 +42,7 @@ class BasicDocQA(Assistant):
                          files=files,
                          rag_cfg=rag_cfg)
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         """This agent using different doc qa prompt with Assistant"""
         # Need to use Memory agent for data management
         *_, last = self.mem.run(messages=messages, **kwargs)

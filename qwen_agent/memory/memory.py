@@ -1,6 +1,6 @@
 import json
 from importlib import import_module
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterator, List, Optional, Union, Literal
 
 import json5
 
@@ -9,10 +9,11 @@ from qwen_agent.llm import BaseChatModel
 from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, USER, Message
 from qwen_agent.log import logger
 from qwen_agent.settings import (DEFAULT_MAX_REF_TOKEN, DEFAULT_PARSER_PAGE_SIZE, DEFAULT_RAG_KEYGEN_STRATEGY,
-                                 DEFAULT_RAG_SEARCHERS)
+                                 DEFAULT_RAG_SEARCHERS, DEFAULT_QUERYGEN_STRATEGY)
 from qwen_agent.tools import BaseTool
 from qwen_agent.tools.simple_doc_parser import PARSER_SUPPORTED_FILE_TYPES
-from qwen_agent.utils.utils import extract_files_from_messages, extract_text_from_message, get_file_type
+from qwen_agent.utils.utils import extract_files_from_messages, extract_text_from_message, get_file_type, import_class, \
+    last_item
 
 
 class Memory(Agent):
@@ -42,6 +43,7 @@ class Memory(Agent):
         self.cfg = rag_cfg or {}
         self.max_ref_token: int = self.cfg.get('max_ref_token', DEFAULT_MAX_REF_TOKEN)
         self.parser_page_size: int = self.cfg.get('parser_page_size', DEFAULT_PARSER_PAGE_SIZE)
+        self.querygen_strategy = self.cfg.get('querygen_strategy', DEFAULT_QUERYGEN_STRATEGY)
         self.rag_searchers = self.cfg.get('rag_searchers', DEFAULT_RAG_SEARCHERS)
         self.rag_keygen_strategy = self.cfg.get('rag_keygen_strategy', DEFAULT_RAG_KEYGEN_STRATEGY)
 
@@ -57,11 +59,12 @@ class Memory(Agent):
             'parser_page_size': self.parser_page_size,
         }] + function_list,
                          llm=llm,
-                         system_message=system_message)
+                         system_message=system_message,
+                         name='memory')
 
         self.system_files = files or []
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         """This agent is responsible for processing the input files in the message.
 
          This method stores the files in the knowledge base, and retrievals the relevant parts
@@ -80,56 +83,64 @@ class Memory(Agent):
 
         if not rag_files:
             yield [Message(role=ASSISTANT, content='', name='memory')]
-        else:
-            query = ''
-            # Only retrieval content according to the last user query if exists
-            if messages and messages[-1].role == USER:
+            return
+
+        query = ''
+        # Only retrieval content according to the last user query if exists, or have specific query-gen strategy
+        if messages and messages[-1].role == USER:
+            if self.querygen_strategy.lower() == 'none':
                 query = extract_text_from_message(messages[-1], add_upload_info=False)
+            else:
+                cls = import_class('qwen_agent.agents.querygen_strategies', self.querygen_strategy)
+                querygen = cls(llm=self.llm)
 
-            # Keyword generation
-            if query and self.rag_keygen_strategy.lower() != 'none':
-                module_name = 'qwen_agent.agents.keygen_strategies'
-                module = import_module(module_name)
-                cls = getattr(module, self.rag_keygen_strategy)
-                keygen = cls(llm=self.llm)
-                response = keygen.run([Message(USER, query)], files=rag_files)
-                last = None
-                for last in response:
-                    continue
+                last = last_item(querygen.run(messages))
                 if last:
-                    keyword = last[-1].content.strip()
+                    query = last[-1].text_content()
                 else:
-                    keyword = ''
+                    query = extract_text_from_message(messages[-1], add_upload_info=False)
 
-                if keyword.startswith('```json'):
-                    keyword = keyword[len('```json'):]
-                if keyword.endswith('```'):
-                    keyword = keyword[:-3]
-                try:
-                    keyword_dict = json5.loads(keyword)
-                    if 'text' not in keyword_dict:
-                        keyword_dict['text'] = query
-                    query = json.dumps(keyword_dict, ensure_ascii=False)
-                    logger.info(query)
-                except Exception:
-                    query = query
+        # Keyword generation
+        if query and self.rag_keygen_strategy.lower() != 'none':
+            cls = import_class('qwen_agent.agents.keygen_strategies', self.rag_keygen_strategy)
+            keygen = cls(llm=self.llm)
 
-            content = self.function_map['retrieval'].call(
-                {
-                    'query': query,
-                    'files': rag_files
-                },
-                **kwargs,
-            )
-            if not isinstance(content, str):
-                content = json.dumps(content, ensure_ascii=False, indent=4)
+            last = last_item(keygen.run([Message(USER, query)], files=rag_files))
+            if last:
+                keyword = last[-1].text_content()
+            else:
+                keyword = ''
 
-            yield [Message(role=ASSISTANT, content=content, name='memory')]
+            if keyword.startswith('```json'):
+                keyword = keyword[len('```json'):]
+            if keyword.endswith('```'):
+                keyword = keyword[:-3]
+            try:
+                keyword_dict = json5.loads(keyword)
+                if 'text' not in keyword_dict:
+                    keyword_dict['text'] = query
+                query = json.dumps(keyword_dict, ensure_ascii=False)
+                logger.info(query)
+            except Exception:
+                query = query
 
-    def get_rag_files(self, messages: List[Message]):
+        content = self.function_map['retrieval'].call(
+            {
+                'query': query,
+                'files': rag_files
+            },
+            **kwargs,
+        )
+        if not isinstance(content, str):
+            content = json.dumps(content, ensure_ascii=False, indent=4)
+
+        yield [Message(role=ASSISTANT, content=content, name='memory')]
+
+    def get_rag_files(self, messages: List[Message]) -> List[str]:
         session_files = extract_files_from_messages(messages, include_images=False)
         files = self.system_files + session_files
-        rag_files = []
+        rag_files: List[str] = []
+        # detect supported files and remove duplicated
         for file in files:
             f_type = get_file_type(file)
             if f_type in PARSER_SUPPORTED_FILE_TYPES and file not in rag_files:

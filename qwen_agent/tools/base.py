@@ -1,8 +1,10 @@
+import json
 import os
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 
 import json5
+import requests
 
 from qwen_agent.llm.schema import ContentItem
 from qwen_agent.settings import DEFAULT_WORKSPACE
@@ -36,6 +38,10 @@ class BaseTool(ABC):
 
     def __init__(self, cfg: Optional[Dict] = None):
         self.cfg = cfg or {}
+        self.name = self.cfg.get('name', self.name)
+        self.description = self.cfg.get('description', self.description)
+        self.parameters = self.cfg.get('parameters', self.parameters)
+
         if not self.name:
             raise ValueError(
                 f'You must set {self.__class__.__name__}.name, either by @register_tool(name=...) or explicitly setting {self.__class__.__name__}.name'
@@ -98,6 +104,36 @@ class BaseTool(ABC):
     @property
     def file_access(self) -> bool:
         return False
+
+
+class ApiBaseTool(BaseTool, ABC):
+    def __init__(self, cfg: Optional[Dict] = None):
+        super().__init__(cfg)
+        self.url: str = self.cfg.get('url')
+
+    def call(self, params: Union[str, dict], files: List[str] = None, **kwargs) -> Union[str, List[ContentItem]]:
+        if isinstance(params, str):
+            function_args = json.loads(params)
+        else:
+            function_args = params
+
+        try:
+            response = requests.post(self.url, json=function_args).text
+            try:
+                json_data = json.loads(response)
+                if 'files' in json_data and len(json_data['files']) > 0:
+                    return [ContentItem(file=file) for file in json_data['files']]
+                elif 'data' in json_data:
+                    response = json_data['data']
+            except:
+                pass
+
+            if not isinstance(response, str):
+                response = json.dumps(response, ensure_ascii=False)
+
+            return response
+        except Exception as e:
+            return str(e)
 
 
 class BaseToolWithFileAccess(BaseTool, ABC):

@@ -51,7 +51,7 @@ Keywords:
     def _run(self,
              messages: List[Message],
              files: Optional[List[str]] = None,
-             lang: str = 'en',
+             lang: str = 'zh',
              **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         files = files or []

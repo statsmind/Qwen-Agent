@@ -34,33 +34,39 @@ class MyImageGen(BaseTool):
 
 
 def init_agent_service():
-    llm_cfg = {'model': 'qwen-max'}
+    llm_cfg = {"generate_cfg": {"max_input_tokens": 31000}}
     system = ("According to the user's request, you first draw a picture and then automatically "
               'run code to download the picture and select an image operation from the given document '
               'to process the image')
 
     tools = [
         'my_image_gen',
-        'code_interpreter',
+        'code_interpreter'
     ]  # code_interpreter is a built-in tool in Qwen-Agent
     bot = Assistant(
         llm=llm_cfg,
-        name='AI painting',
-        description='AI painting service',
+        name='助理',
+        description='我的私人助理',
         system_message=system,
         function_list=tools,
-        files=[os.path.join(ROOT_RESOURCE, 'doc.pdf')],
+        files=[],
     )
 
     return bot
 
 
-def test(query: str = 'draw a dog'):
+def app_test(query: str = "draw a software architecture diagram, user's text input to LLM, and LLM calls function calling, with graphrag"):
     # Define the agent
     bot = init_agent_service()
 
     # Chat
-    messages = [{'role': 'user', 'content': query}]
+    messages = [
+        {'role': 'user', 'content': "画一只猫"},
+        {'role': 'assistant', 'content': "好的，这就为你画"},
+        {'role': 'user', 'content': "旁边有条狗"},
+        {'role': 'assistant', 'content': "好的，这就为你画"},
+        {'role': 'user', 'content': "查询东方国信的相关资讯"}
+    ]
     for response in bot.run(messages=messages):
         print('bot response:', response)
 
@@ -97,6 +103,6 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    # test()
+    # app_test()
     # app_tui()
     app_gui()

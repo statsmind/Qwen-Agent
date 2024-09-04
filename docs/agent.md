@@ -74,7 +74,7 @@ For development using GroupChat, you can refer to the [Gomoku](../examples/group
 
 As our Agent class is defined as a workflow for processing messages, we can flexibly develop specific Agent classes.
 By examining the [Agent](../qwen_agent/agent.py) base class, it becomes apparent that when we develop an Agent subclass, we only need to implement the function
-`._run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]`,
+`._run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]`,
 which receives a list of messages as input and returns an iterator over lists of messages.
 
 During the development process, the functions `_call_llm(...)` and `_call_tool(...)` can be used to call LLMs or Tools.
@@ -187,7 +187,7 @@ class DocQA(Agent):
     def _run(self,
              messages: List[Message],
              knowledge: str = '',
-             lang: str = 'en',
+             lang: str = 'zh',
              **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         system_prompt = PROMPT_TEMPLATE[lang].format(ref_doc=knowledge)

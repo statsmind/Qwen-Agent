@@ -15,10 +15,11 @@ def test():
     # Config for the model
     llm_cfg_oai = {
         # Using Qwen2-VL deployed at any openai-compatible service such as vLLM:
-        'model_type': 'qwenvl_oai',
-        'model': 'Qwen/Qwen2-VL-72B-Instruct',
-        'model_server': 'http://localhost:8000/v1',  # api_base
-        'api_key': 'EMPTY',
+        # 'model_type': 'qwenvl_oai',
+        'model': 'qwen-vl-max'
+        # 'model': 'Qwen/Qwen2-VL-72B-Instruct',
+        # 'model_server': 'http://localhost:8000/v1',  # api_base
+        # 'api_key': 'EMPTY',
     }
     llm = get_chat_model(llm_cfg_oai)
 

@@ -1,19 +1,38 @@
-from qwen_agent.agents.doc_qa import ParallelDocQA
+from qwen_agent.agents import Assistant
+from qwen_agent.agents.doc_qa import ParallelDocQA, BasicDocQA
 from qwen_agent.gui import WebUI
 
 
 def test():
-    bot = ParallelDocQA(llm={'model': 'qwen2-72b-instruct', 'generate_cfg': {'max_retries': 10}})
+    bot = Assistant(llm={'model': 'qwen2-72b-instruct', 'generate_cfg': {'max_retries': 10, 'max_input_tokens': 31000}})
     messages = [
         {
             'role': 'user',
             'content': [
                 {
-                    'text': '介绍实验方法'
+                    'text': '这篇分析报告的观点是什么？'
                 },
                 {
-                    'file': 'https://arxiv.org/pdf/2310.08560.pdf'
-                },
+                    'file': 'https://finance.sina.com.cn/stock/yyyj/2024-08-30/doc-incmkqct9220570.shtml'
+                }
+                # {
+                #     'file': 'https://finance.sina.com.cn/roll/2024-08-31/doc-incmpiyf9400556.shtml'
+                # },
+                # {
+                #     'file': 'https://finance.sina.com.cn/stock/yyyj/2024-08-31/doc-incmnxku2769167.shtml'
+                # },
+                # {
+                #     'file': 'https://finance.sina.com.cn/jjxw/2024-08-31/doc-incmntap9659200.shtml'
+                # },
+                # {
+                #     'file': 'https://finance.sina.com.cn/stock/relnews/cn/2024-08-30/doc-incmmvxh3144422.shtml'
+                # },
+                # {
+                #     'file': 'https://finance.sina.com.cn/stock/hkstock/ggscyd/2024-08-30/doc-incmmvww3255060.shtml'
+                # },
+                # {
+                #     'file': 'https://finance.sina.com.cn/stock/relnews/cn/2024-08-30/doc-incmmvww3249464.shtml'
+                # }
             ]
         },
     ]
@@ -23,7 +42,7 @@ def test():
 
 def app_gui():
     # Define the agent
-    bot = ParallelDocQA(
+    bot = BasicDocQA(
         llm={
             'model': 'qwen2-72b-instruct',
             'generate_cfg': {

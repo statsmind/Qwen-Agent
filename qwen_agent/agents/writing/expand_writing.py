@@ -46,7 +46,7 @@ class ExpandWriting(Agent):
              index: str = '1',
              capture: str = '',
              capture_later: str = '',
-             lang: str = 'en',
+             lang: str = 'zh',
              **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         prompt = PROMPT_TEMPLATE[lang].format(

@@ -31,7 +31,7 @@ class VirtualMemoryAgent(Assistant):
                          files=files,
                          rag_cfg=rag_cfg)
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         ori_messages = messages
         messages = copy.deepcopy(messages)
         num_llm_calls_available = MAX_LLM_CALL_PER_RUN
@@ -63,7 +63,7 @@ class VirtualMemoryAgent(Assistant):
             else:
                 break
 
-    def _format_file(self, messages: List[Message], lang: str = 'en') -> List[Message]:
+    def _format_file(self, messages: List[Message], lang: str = 'zh') -> List[Message]:
         if lang == 'en':
             file_prefix = '[file]({f_name})'
         else:

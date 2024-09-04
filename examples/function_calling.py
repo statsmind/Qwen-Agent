@@ -1,8 +1,13 @@
 # Reference: https://platform.openai.com/docs/guides/function-calling
 import json
 import os
+from urllib.parse import urljoin
+
+import requests
+from jsonref import replace_refs
 
 from qwen_agent.llm import get_chat_model
+from qwen_agent.tools.apibank import ApiBank
 
 
 # Example dummy function hard coded to return the same weather
@@ -43,7 +48,7 @@ def test():
     })
 
     # Step 1: send the conversation and available functions to the model
-    messages = [{'role': 'user', 'content': "What's the weather like in San Francisco?"}]
+    messages = [{'role': 'user', 'content': "怎样从上地佳园步行到五彩城"}]
     functions = [{
         'name': 'get_current_weather',
         'description': 'Get the current weather in a given location',
@@ -61,7 +66,9 @@ def test():
             },
             'required': ['location'],
         },
-    }]
+    }, 'apibank']
+
+    api_bank = ApiBank()
 
     print('# Assistant Response 1:')
     responses = []
@@ -92,18 +99,22 @@ def test():
 
         # Step 3: call the function
         # Note: the JSON response may not always be valid; be sure to handle errors
-        available_functions = {
-            'get_current_weather': get_current_weather,
-        }  # only one function in this example, but you can have multiple
+        # available_functions = {
+        #     'get_current_weather': get_current_weather,
+        # }  # only one function in this example, but you can have multiple
+        # function_name = last_response['function_call']['name']
+        # function_to_call = available_functions[function_name]
+        # function_args = json.loads(last_response['function_call']['arguments'])
+        # function_response = function_to_call(
+        #     location=function_args.get('location'),
+        #     unit=function_args.get('unit'),
+        # )
+        # print('# Function Response:')
+        # print(function_response)
         function_name = last_response['function_call']['name']
-        function_to_call = available_functions[function_name]
+        function_to_call = api_bank.function_map[function_name]
         function_args = json.loads(last_response['function_call']['arguments'])
-        function_response = function_to_call(
-            location=function_args.get('location'),
-            unit=function_args.get('unit'),
-        )
-        print('# Function Response:')
-        print(function_response)
+        function_response = requests.post(function_to_call, json=function_args).text
 
         # Step 4: send the info for each function call and function response to the model
         messages.append({

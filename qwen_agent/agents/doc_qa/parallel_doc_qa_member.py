@@ -115,7 +115,7 @@ class ParallelDocQAMember(Agent):
     def _run(self,
              messages: List[Message],
              knowledge: str = '',
-             lang: str = 'en',
+             lang: str = 'zh',
              instruction: str = None,
              **kwargs) -> Iterator[List[Message]]:
 

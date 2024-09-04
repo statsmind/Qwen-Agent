@@ -10,11 +10,13 @@ import sys
 import time
 import traceback
 import urllib.parse
+from importlib import import_module
 from io import BytesIO
-from typing import Any, List, Literal, Optional, Tuple, Union
+from typing import Any, List, Literal, Optional, Tuple, Union, Iterator
 
 import json5
 import requests
+from aiohttp import ClientSession
 
 from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, FUNCTION, SYSTEM, USER, ContentItem, Message
 from qwen_agent.log import logger
@@ -77,15 +79,21 @@ CHINESE_CHAR_RE = re.compile(r'[\u4e00-\u9fff]')
 
 
 def has_chinese_chars(data: Any) -> bool:
+    if isinstance(data, Message):
+        data = data.text_content()
+
     text = f'{data}'
     return bool(CHINESE_CHAR_RE.search(text))
 
 
 def has_chinese_messages(messages: List[Union[Message, dict]], check_roles: Tuple[str] = (SYSTEM, USER)) -> bool:
+    messages = reversed(messages)
     for m in messages:
         if m['role'] in check_roles:
             if has_chinese_chars(m['content']):
                 return True
+            else:
+                return False
     return False
 
 
@@ -179,7 +187,7 @@ def save_url_to_local_work_dir(url: str, save_dir: str, save_filename: str = '')
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             with open(new_path, 'wb') as file:
                 file.write(response.content)
@@ -190,12 +198,46 @@ def save_url_to_local_work_dir(url: str, save_dir: str, save_filename: str = '')
     return new_path
 
 
+async def async_save_url_to_local_work_dir(url: str, save_dir: str, save_filename: str = '') -> str:
+    if not save_filename:
+        save_filename = get_basename_from_url(url)
+    new_path = os.path.join(save_dir, save_filename)
+    if os.path.exists(new_path):
+        os.remove(new_path)
+    logger.info(f'Downloading {url} to {new_path}...')
+    start_time = time.time()
+    if not is_http_url(url):
+        url = sanitize_chrome_file_path(url)
+        shutil.copy(url, new_path)
+    else:
+        headers = {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+        }
+
+        async with ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                html_content = await response.text()
+
+        if response.status == 200:
+            with open(new_path, 'w') as file:
+                file.write(html_content)
+        else:
+            raise ValueError('Can not download this file. Please check your network or the file link.')
+    end_time = time.time()
+    logger.info(f'Finished downloading {url} to {new_path}. Time spent: {end_time - start_time} seconds.')
+    return new_path
+
+
 def save_text_to_file(path: str, text: str) -> None:
+    path = path.replace(':', '-')
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as fp:
         fp.write(text)
 
 
 def read_text_from_file(path: str) -> str:
+    path = path.replace(':', '-')
     try:
         with open(path, 'r', encoding='utf-8') as file:
             file_content = file.read()
@@ -458,3 +500,31 @@ def resize_image(img, short_side_length: int = 1080):
 
     resized_img = img.resize((new_width, new_height), resample=Image.Resampling.BILINEAR)
     return resized_img
+
+
+def import_class(module_name, class_name):
+    module = import_module(module_name)
+    return getattr(module, class_name)
+
+
+def last_item(iter: Iterator):
+    if iter is None:
+        return None
+
+    last = None
+    for last in iter:
+        continue
+    return last
+
+
+def list_files(path: str) -> List[str]:
+    PARSER_SUPPORTED_FILE_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls']
+
+    files = []
+    for dirpath, _, filenames in os.walk(path):
+        for filename in filenames:
+            f_type = get_file_type(filename)
+            if f_type in PARSER_SUPPORTED_FILE_TYPES:
+                files.append(os.path.join(dirpath, filename))
+
+    return files

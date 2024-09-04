@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterator, List, Optional, Union, Literal
 
 from qwen_agent import Agent
 from qwen_agent.llm.base import BaseChatModel
@@ -63,7 +63,7 @@ Keywords:
             new_generate_cfg={'stop': ['Observation:', 'Observation:\n']},
         )
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         messages[-1][CONTENT] = self.PROMPT_TEMPLATE[lang].format(user_request=messages[-1].content)
         return self._call_llm(messages=messages)

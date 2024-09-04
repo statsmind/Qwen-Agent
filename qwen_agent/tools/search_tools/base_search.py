@@ -63,9 +63,9 @@ class BaseSearch(BaseTool):
 
         return self.search(query=query, docs=new_docs, max_ref_token=max_ref_token)
 
-    def search(self, query: str, docs: List[Record], max_ref_token: int = DEFAULT_MAX_REF_TOKEN) -> list:
+    def search(self, query: str, docs: List[Record], max_ref_token: int = DEFAULT_MAX_REF_TOKEN, max_doc_num: int = -1) -> list:
         chunk_and_score = self.sort_by_scores(query=query, docs=docs, max_ref_token=max_ref_token)
-        return self.get_topk(chunk_and_score=chunk_and_score, docs=docs, max_ref_token=max_ref_token)
+        return self.get_topk(chunk_and_score=chunk_and_score, docs=docs, max_ref_token=max_ref_token, max_doc_num=max_doc_num)
 
     @abstractmethod
     def sort_by_scores(self, query: str, docs: List[Record], **kwargs) -> List[Tuple[str, int, float]]:
@@ -84,8 +84,10 @@ class BaseSearch(BaseTool):
     def get_topk(self,
                  chunk_and_score: List[Tuple[str, int, float]],
                  docs: List[Record],
-                 max_ref_token: int = DEFAULT_MAX_REF_TOKEN) -> list:
+                 max_ref_token: int = DEFAULT_MAX_REF_TOKEN,
+                 max_doc_num: int = -1) -> list:
         available_token = max_ref_token
+        retrieved_docs_num = 0
 
         docs_retrieved = {}  # [{'url': 'doc id', 'text': ['', '', ...]}]
         docs_map = {}
@@ -94,7 +96,7 @@ class BaseSearch(BaseTool):
             docs_retrieved[doc.url] = RefMaterialOutput(url=doc.url, text=[''] * len(doc.raw))
 
         for doc_id, chunk_id, _ in chunk_and_score:
-            if available_token <= 0:
+            if available_token <= 0 or 0 < max_doc_num <= retrieved_docs_num:
                 break
             page = docs_map[doc_id].raw[chunk_id]
             if docs_retrieved[doc_id].text[chunk_id]:
@@ -105,6 +107,7 @@ class BaseSearch(BaseTool):
                 break
             docs_retrieved[doc_id].text[chunk_id] = page.content
             available_token -= page.token
+            retrieved_docs_num += 1
 
         res = []
         for x in docs_retrieved.values():

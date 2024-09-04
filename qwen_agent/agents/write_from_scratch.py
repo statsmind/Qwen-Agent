@@ -19,7 +19,7 @@ def is_roman_numeral(s):
 
 class WriteFromScratch(Agent):
 
-    def _run(self, messages: List[Message], knowledge: str = '', lang: str = 'en') -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], knowledge: str = '', lang: str = 'zh') -> Iterator[List[Message]]:
 
         response = [Message(ASSISTANT, f'>\n> Use Default plans: \n{default_plan}')]
         yield response

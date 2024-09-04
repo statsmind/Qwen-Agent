@@ -70,7 +70,7 @@ class GroupChatCreator(Agent):
     def _run(self,
              messages: List[Message],
              agents: List[Agent] = None,
-             lang: str = 'en',
+             lang: str = 'zh',
              **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         messages = self._preprocess_messages(messages)

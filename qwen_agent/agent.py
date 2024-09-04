@@ -2,14 +2,14 @@ import copy
 import json
 import traceback
 from abc import ABC, abstractmethod
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Literal
 
 from qwen_agent.llm import get_chat_model
 from qwen_agent.llm.base import BaseChatModel
 from qwen_agent.llm.schema import CONTENT, DEFAULT_SYSTEM_MESSAGE, ROLE, SYSTEM, ContentItem, Message
 from qwen_agent.log import logger
 from qwen_agent.tools import TOOL_REGISTRY, BaseTool
-from qwen_agent.utils.utils import has_chinese_messages, merge_generate_cfgs
+from qwen_agent.utils.utils import has_chinese_messages, merge_generate_cfgs, has_chinese_chars
 
 
 class Agent(ABC):
@@ -37,7 +37,7 @@ class Agent(ABC):
             name: The name of this agent.
             description: The description of this agent, which will be used for multi_agent.
         """
-        if isinstance(llm, dict):
+        if not llm or isinstance(llm, dict):
             self.llm = get_chat_model(llm)
         else:
             self.llm = llm
@@ -46,7 +46,7 @@ class Agent(ABC):
         self.function_map = {}
         if function_list:
             for tool in function_list:
-                self._init_tool(tool)
+                self.init_tool(tool)
 
         self.system_message = system_message
         self.name = name
@@ -85,7 +85,8 @@ class Agent(ABC):
                 new_messages.append(msg)
                 _return_message_type = 'message'
 
-        if 'lang' not in kwargs:
+        if 'lang' not in kwargs or kwargs['lang'] == 'auto':
+            # detect language from last user or system message
             if has_chinese_messages(new_messages):
                 kwargs['lang'] = 'zh'
             else:
@@ -101,7 +102,7 @@ class Agent(ABC):
                 yield [x.model_dump() if not isinstance(x, dict) else x for x in rsp]
 
     @abstractmethod
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         """Return one response generator based on the received messages.
 
         The workflow for an agent to generate a reply.
@@ -185,7 +186,7 @@ class Agent(ABC):
         else:
             return json.dumps(tool_result, ensure_ascii=False, indent=4)
 
-    def _init_tool(self, tool: Union[str, Dict, BaseTool]):
+    def init_tool(self, tool: Union[str, Dict, BaseTool]):
         if isinstance(tool, BaseTool):
             tool_name = tool.name
             if tool_name in self.function_map:

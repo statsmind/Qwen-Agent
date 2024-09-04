@@ -54,7 +54,7 @@ PROMPT_END_TEMPLATE = {
 
 class ParallelDocQASummary(Agent):
 
-    def _run(self, messages: List[Message], knowledge: str = '', lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], knowledge: str = '', lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
 
         system_prompt = PROMPT_TEMPLATE[lang].format(ref_doc=knowledge)

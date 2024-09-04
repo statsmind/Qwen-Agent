@@ -121,3 +121,7 @@ class Message(BaseModelCompatibleDict):
         if value not in [USER, ASSISTANT, SYSTEM, FUNCTION]:
             raise ValueError(f'{value} must be one of {",".join([USER, ASSISTANT, SYSTEM, FUNCTION])}')
         return value
+
+    def text_content(self):
+        from qwen_agent.utils.utils import extract_text_from_message
+        return extract_text_from_message(self, add_upload_info=False)

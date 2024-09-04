@@ -142,7 +142,7 @@ bot response:
 
 由于我们的一个Agent类定义为一种处理消息的工作流，因此，我们可以较灵活的开发特定的Agent类。
 通过查看[Agent](../qwen_agent/agent.py)基类，可以看出，我们开发一个Agent子类时，只需要实现
-`._run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]函数`,
+`._run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]函数`,
 它接收一个消息列表输入，并返回一个消息列表迭代器。
 
 在开发过程中，可以使用`_call_llm(...)`和`_call_tool(...)`函数来调用LLM或Tool，也可以嵌套使用其他Agent，例如使用`Assistant.run(...)`来直接利用Assistant的Tool/LLM规划能力。
@@ -253,7 +253,7 @@ class DocQA(Agent):
     def _run(self,
              messages: List[Message],
              knowledge: str = '',
-             lang: str = 'en',
+             lang: str = 'zh',
              **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
         system_prompt = PROMPT_TEMPLATE[lang].format(ref_doc=knowledge)

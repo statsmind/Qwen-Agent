@@ -1,13 +1,15 @@
 import copy
+import json
 from typing import Dict, Iterator, List, Literal, Optional, Union
 
 from qwen_agent import Agent
+from qwen_agent.agents.querygen_strategies import GenQuery
 from qwen_agent.llm import BaseChatModel
-from qwen_agent.llm.schema import DEFAULT_SYSTEM_MESSAGE, FUNCTION, Message
+from qwen_agent.llm.schema import DEFAULT_SYSTEM_MESSAGE, FUNCTION, Message, USER, ContentItem, CONTENT, ROLE, SYSTEM
 from qwen_agent.memory import Memory
 from qwen_agent.settings import MAX_LLM_CALL_PER_RUN
-from qwen_agent.tools import BaseTool
-from qwen_agent.utils.utils import extract_files_from_messages
+from qwen_agent.tools import BaseTool, ApiBank
+from qwen_agent.utils.utils import extract_files_from_messages, import_class, last_item, extract_text_from_message
 
 
 class FnCallAgent(Agent):
@@ -43,8 +45,21 @@ class FnCallAgent(Agent):
             # Default to use Memory to manage files
             self.mem = Memory(llm=self.llm, files=files, **kwargs)
 
-    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
+
+        # 第一步，总结独立问题，方便搜索工具
+        last = last_item(GenQuery(llm=self.llm).run(messages))
+        if last:
+            query = last[-1].text_content()
+        else:
+            query = extract_text_from_message(messages[-1], add_upload_info=False)
+
+        # 第二步，搜索合适的工具
+        searched_tools = ApiBank().call({"query": query})
+        for tool in searched_tools:
+            self.init_tool(tool)
+
         num_llm_calls_available = MAX_LLM_CALL_PER_RUN
         response = []
         while True and num_llm_calls_available > 0:
@@ -64,6 +79,10 @@ class FnCallAgent(Agent):
                     use_tool, tool_name, tool_args, _ = self._detect_tool(out)
                     if use_tool:
                         tool_result = self._call_tool(tool_name, tool_args, messages=messages, **kwargs)
+                        if isinstance(tool_result, List) and any(c.file for c in tool_result):
+                            *_, last = self.mem.run(messages=[Message(FUNCTION, content=tool_result)], **kwargs)
+                            tool_result.append(ContentItem(text=last[-1][CONTENT]))
+
                         fn_msg = Message(
                             role=FUNCTION,
                             name=tool_name,

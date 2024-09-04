@@ -10,7 +10,7 @@ from qwen_agent.log import logger
 from qwen_agent.settings import DEFAULT_MAX_INPUT_TOKENS
 from qwen_agent.utils.tokenization_qwen import tokenizer
 from qwen_agent.utils.utils import (extract_text_from_message, format_as_multimodal_message, format_as_text_message,
-                                    has_chinese_messages, merge_generate_cfgs, print_traceback)
+                                    has_chinese_messages, merge_generate_cfgs, print_traceback, has_chinese_chars)
 
 LLM_REGISTRY = {}
 
@@ -193,6 +193,7 @@ class BaseChatModel(ABC):
         delta_stream: bool,
         generate_cfg: dict,
     ) -> Union[List[Message], Iterator[List[Message]]]:
+        logger.info("chat with messages: {}".format(messages))
         if stream:
             return self._chat_stream(messages, delta_stream=delta_stream, generate_cfg=generate_cfg)
         else:

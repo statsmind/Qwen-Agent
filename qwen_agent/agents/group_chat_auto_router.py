@@ -41,7 +41,7 @@ Only return the role name from [{agent_names}] or '[STOP]'. Do not reply any oth
                  **kwargs):
         # This agent need prepend special system message according to inputted agents
         agent_descs = '\n'.join([f'{x.name}: {x.description}' for x in agents])
-        lang = 'en'
+        lang = 'zh'
         if has_chinese_chars(agent_descs):
             lang = 'zh'
         system_prompt = self.PROMPT_TEMPLATE[lang].format(agent_descs=agent_descs,
@@ -54,7 +54,7 @@ Only return the role name from [{agent_names}] or '[STOP]'. Do not reply any oth
                          description=description,
                          **kwargs)
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
 
         dialogue = []
         for msg in messages:

@@ -49,7 +49,10 @@ def convert_fncall_to_text(messages: List[Dict]) -> List[Dict]:
 
     for msg in messages:
         role, content, name = msg[ROLE], msg[CONTENT], msg.get(NAME, None)
-        content = (content or '').lstrip('\n').rstrip()
+        if isinstance(content, List):
+            content = "\n".join([c['text'] for c in content if 'text' in c and c['text']])
+        else:
+            content = (content or '').lstrip('\n').rstrip()
 
         # if role is system or user, just append the message
         if role in (SYSTEM, USER):

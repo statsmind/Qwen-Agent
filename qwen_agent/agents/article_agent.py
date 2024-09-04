@@ -14,8 +14,8 @@ class ArticleAgent(Assistant):
 
     def _run(self,
              messages: List[Message],
-             lang: str = 'en',
-             full_article: bool = False,
+             lang: str = 'zh',
+             full_article: bool = True,
              **kwargs) -> Iterator[List[Message]]:
 
         # Need to use Memory agent for data management

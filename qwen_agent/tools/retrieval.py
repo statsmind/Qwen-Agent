@@ -1,7 +1,8 @@
+import os
 from typing import Dict, Optional, Union
 
 import json5
-
+from concurrent.futures import ThreadPoolExecutor
 from qwen_agent.settings import DEFAULT_MAX_REF_TOKEN, DEFAULT_PARSER_PAGE_SIZE, DEFAULT_RAG_SEARCHERS
 from qwen_agent.tools.base import TOOL_REGISTRY, BaseTool, register_tool
 from qwen_agent.tools.doc_parser import DocParser, Record
@@ -74,10 +75,25 @@ class Retrieval(BaseTool):
         files = params.get('files', [])
         if isinstance(files, str):
             files = json5.loads(files)
-        records = []
-        for file in files:
-            _record = self.doc_parse.call(params={'url': file}, **kwargs)
-            records.append(_record)
+
+        thread_pool = ThreadPoolExecutor(max_workers=(os.cpu_count() + 1) // 2)
+
+        def thread_func(file):
+            try:
+                return self.doc_parse.call(params={'url': file}, **kwargs)
+            except Exception as ex:
+                print(ex)
+                return None
+
+        records = thread_pool.map(thread_func, files)
+        records = [record for record in records if record]
+        thread_pool.shutdown()
+
+            # try:
+            #     _record = self.doc_parse.call(params={'url': file}, **kwargs)
+            #     records.append(_record)
+            # except Exception as ex:
+            #     print(ex)
 
         query = params.get('query', '')
         if records:

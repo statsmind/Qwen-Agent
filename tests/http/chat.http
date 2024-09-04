@@ -1,0 +1,10 @@
+POST http://localhost:8080/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer sk-openai
+
+{
+  "messages": [
+    {"role": "user", "content": "东方国信股价是多少？"}
+  ],
+  "model": ""
+}

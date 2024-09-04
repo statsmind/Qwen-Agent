@@ -22,7 +22,7 @@ class SplitQueryThenGenKeyword(Agent):
         self.split_query = SplitQuery(llm=self.llm)
         self.keygen = GenKeyword(llm=llm)
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         query = messages[-1].content
 
         *_, last = self.split_query.run(messages=messages, lang=lang, **kwargs)

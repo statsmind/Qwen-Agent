@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+
 from qwen_agent.agent import Agent
 from qwen_agent.multi_agent_hub import MultiAgentHub
 
@@ -17,6 +19,8 @@ from .router import Router
 from .user_agent import UserAgent
 from .virtual_memory_agent import VirtualMemoryAgent
 from .write_from_scratch import WriteFromScratch
+
+load_dotenv()
 
 __all__ = [
     'Agent',

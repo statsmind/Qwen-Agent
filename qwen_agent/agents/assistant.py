@@ -86,7 +86,7 @@ class Assistant(FnCallAgent):
 
     def _run(self,
              messages: List[Message],
-             lang: Literal['en', 'zh'] = 'en',
+             lang: Literal['en', 'zh'] = 'zh',
              knowledge: str = '',
              **kwargs) -> Iterator[List[Message]]:
         """Q&A with RAG and tool use abilities.
@@ -102,7 +102,7 @@ class Assistant(FnCallAgent):
 
     def _prepend_knowledge_prompt(self,
                                   messages: List[Message],
-                                  lang: Literal['en', 'zh'] = 'en',
+                                  lang: Literal['en', 'zh'] = 'zh',
                                   knowledge: str = '',
                                   **kwargs) -> List[Message]:
         messages = copy.deepcopy(messages)
@@ -133,7 +133,7 @@ class Assistant(FnCallAgent):
 
 
 def get_current_date_str(
-    lang: Literal['en', 'zh'] = 'en',
+    lang: Literal['en', 'zh'] = 'zh',
     hours_from_utc: Optional[int] = None,
 ) -> str:
     if hours_from_utc is None:

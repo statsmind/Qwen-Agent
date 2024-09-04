@@ -1,11 +1,11 @@
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterator, List, Optional, Union, Literal
 
 from qwen_agent.agents.keygen_strategies.gen_keyword import GenKeyword
 from qwen_agent.llm import BaseChatModel
 from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, Message
 from qwen_agent.log import logger
 from qwen_agent.tools import BaseTool
-from qwen_agent.utils.utils import merge_generate_cfgs
+from qwen_agent.utils.utils import merge_generate_cfgs, last_item
 
 
 class SplitQuery(GenKeyword):
@@ -75,9 +75,10 @@ Result:
             new_generate_cfg={'stop': ['"], "instruction":']},
         )
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
-        for last in super()._run(messages=messages, lang=lang, **kwargs):
-            continue
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
+        # for last in super()._run(messages=messages, lang=lang, **kwargs):
+        #     continue
+        last = last_item(super()._run(messages=messages, lang=lang, **kwargs))
         extracted_content = last[-1].content.strip()
         logger.info(f'Extracted info from query: {extracted_content}')
         if extracted_content.endswith('}') or extracted_content.endswith('```'):

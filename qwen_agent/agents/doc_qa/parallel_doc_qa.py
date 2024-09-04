@@ -83,7 +83,7 @@ class ParallelDocQA(Assistant):
     def _retrieve_according_to_member_responses(
         self,
         messages: List[Message],
-        lang: str = 'en',
+        lang: str = 'zh',
         user_question: str = '',
         member_res: str = '',
     ):
@@ -172,7 +172,7 @@ class ParallelDocQA(Assistant):
         except Exception:
             return False, content
 
-    def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
 
         messages = copy.deepcopy(messages)
         # Extract User Question
@@ -240,7 +240,7 @@ class ParallelDocQA(Assistant):
     def _ask_member_agent(self,
                           index: int,
                           messages: List[Message],
-                          lang: str = 'en',
+                          lang: str = 'zh',
                           knowledge: str = '',
                           instruction: str = '') -> tuple:
         doc_qa = ParallelDocQAMember(llm=self.llm)

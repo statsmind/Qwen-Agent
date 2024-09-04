@@ -28,7 +28,7 @@ class DialogueRetrievalAgent(Assistant):
 
     def _run(self,
              messages: List[Message],
-             lang: str = 'en',
+             lang: str = 'zh',
              session_id: str = '',
              **kwargs) -> Iterator[List[Message]]:
         """Process messages and response
