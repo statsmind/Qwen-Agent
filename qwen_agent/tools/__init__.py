@@ -10,6 +10,8 @@ from .simple_doc_parser import SimpleDocParser
 from .storage import Storage
 from .web_extractor import WebExtractor
 from .apibank import ApiBank
+from .web_search import WebSearch
+
 
 __all__ = [
     'BaseTool',
@@ -27,5 +29,6 @@ __all__ = [
     'HybridSearch',
     'FrontPageSearch',
     'ExtractDocVocabulary',
-    'ApiBank'
+    'ApiBank',
+    'WebSearch'
 ]

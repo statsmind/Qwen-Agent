@@ -35,13 +35,12 @@ class MyImageGen(BaseTool):
 
 def init_agent_service():
     llm_cfg = {"generate_cfg": {"max_input_tokens": 31000}}
-    system = ("According to the user's request, you first draw a picture and then automatically "
-              'run code to download the picture and select an image operation from the given document '
-              'to process the image')
+    system = "你是我的私人助理。你的回答要风趣幽默，口语化，有批判性，尖锐，不要总是用列表式的回答来糊弄我，善于用一些例子来表达你的观点。"
 
     tools = [
         'my_image_gen',
-        'code_interpreter'
+        'code_interpreter',
+        'web_search'
     ]  # code_interpreter is a built-in tool in Qwen-Agent
     bot = Assistant(
         llm=llm_cfg,
@@ -103,6 +102,6 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    app_test()
+    # app_test()
     # app_tui()
-    # app_gui()
+    app_gui()
