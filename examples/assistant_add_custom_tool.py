@@ -103,6 +103,6 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    # app_test()
+    app_test()
     # app_tui()
-    app_gui()
+    # app_gui()
