@@ -72,8 +72,8 @@ class Assistant(FnCallAgent):
                  function_list: Optional[List[Union[str, Dict, BaseTool]]] = None,
                  llm: Optional[Union[Dict, BaseChatModel]] = None,
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
-                 name: Optional[str] = None,
-                 description: Optional[str] = None,
+                 name: Optional[str] = 'Assistant',
+                 description: Optional[str] = 'Assistant',
                  files: Optional[List[str]] = None,
                  rag_cfg: Optional[Dict] = None,
                  **kwargs):

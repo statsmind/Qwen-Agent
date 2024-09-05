@@ -3,18 +3,32 @@ from qwen_agent.gui import WebUI
 
 
 def app_test():
-    bot = Assistant(llm={'model': 'qwen2-72b-instruct'}, function_list=['web_search'])
-    messages = [{'role': 'user', 'content': [{'text': 'angular路由是怎么工作的？举个实际的例子'}, {'file': 'D:\\workspace\\gitee\\NiceFish'}]}]
+    bot = Assistant(
+        function_list=['web_search', 'code_interpreter'],
+        files=[
+            r'D:\workspace\mine\medical2.0\openhis-api\src',
+            r'D:\workspace\mine\medical2.0\openhis-ui\src'
+        ]
+    )
+    messages = [{'role': 'user', 'content': [{'text': '加入功能：药品可以转移到其他药库，给出前后端代码实现，以及代码的位置'}]}]
     for rsp in bot.run(messages):
         print(rsp)
+
+    print("=========================================")
+    for item in rsp:
+        print(item['content'])
 
 
 def app_gui():
     # Define the agent
-    bot = Assistant(llm={'model': 'qwen2-72b-instruct'}, function_list=['web_search'],
+    bot = Assistant(llm={'model': 'qwen2-72b-instruct'},
+                    function_list=['web_search', 'code_interpreter'],
                     name='Assistant',
                     description='使用RAG检索并回答，支持文件类型：PDF/Word/PPT/TXT/HTML。',
-                    files=['D:\\workspace\\gitee\\NiceFish']
+                    files=[
+                        r'D:\workspace\mine\medical2.0\openhis-api\src',
+                        r'D:\workspace\mine\medical2.0\openhis-ui\src'
+                    ]
                     )
     chatbot_config = {
         'prompt.suggestions': [

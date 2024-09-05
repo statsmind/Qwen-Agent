@@ -231,14 +231,12 @@ async def async_save_url_to_local_work_dir(url: str, save_dir: str, save_filenam
 
 
 def save_text_to_file(path: str, text: str) -> None:
-    path = path.replace(':', '-')
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as fp:
         fp.write(text)
 
 
 def read_text_from_file(path: str) -> str:
-    path = path.replace(':', '-')
     try:
         with open(path, 'r', encoding='utf-8') as file:
             file_content = file.read()

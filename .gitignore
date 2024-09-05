@@ -1,8 +1,8 @@
 env
 *.pyc
 __pycache__
-.env
-.env.bak
+*.env
+*.env.bak
 .idea
 .vscode
 .DS_Store

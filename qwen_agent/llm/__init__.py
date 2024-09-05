@@ -35,7 +35,7 @@ def get_chat_model(cfg: Optional[Dict] = None) -> BaseChatModel:
     cfg = {
         "api_key": os.environ.get("OPENAI_API_KEY", ""),
         "model_server": os.environ.get("OPENAI_BASE_URL", "dashscope"),
-        "model": os.environ.get("OPENAI_MODEL", ""),
+        "model": os.environ.get("OPENAI_MODEL", "qwen2-72b-instruct"),
         **cfg
     }
 
