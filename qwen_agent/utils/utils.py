@@ -20,6 +20,7 @@ from aiohttp import ClientSession
 
 from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, FUNCTION, SYSTEM, USER, ContentItem, Message
 from qwen_agent.log import logger
+from qwen_agent.settings import PARSER_SUPPORTED_FILE_TYPES
 
 
 def append_signal_handler(sig, handler):
@@ -263,9 +264,9 @@ def get_content_type_by_head_request(path: str) -> str:
         return 'unk'
 
 
-def get_file_type(path: str) -> Literal['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'unk']:
+def get_file_type(path: str) -> str:
     f_type = get_basename_from_url(path).split('.')[-1].lower()
-    if f_type in ['pdf', 'docx', 'pptx', 'csv', 'tsv', 'xlsx', 'xls']:
+    if f_type in PARSER_SUPPORTED_FILE_TYPES:
         # Specially supported file types
         return f_type
 
@@ -286,7 +287,7 @@ def get_file_type(path: str) -> Literal['pdf', 'docx', 'pptx', 'txt', 'html', 'c
         try:
             content = read_text_from_file(path)
         except Exception:
-            print_traceback()
+            # print_traceback()
             return 'unk'
 
         if contains_html_tags(content):

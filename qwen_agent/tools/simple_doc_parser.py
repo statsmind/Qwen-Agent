@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Union
 import json5
 
 from qwen_agent.log import logger
-from qwen_agent.settings import DEFAULT_WORKSPACE
+from qwen_agent.settings import DEFAULT_WORKSPACE, PARSER_SUPPORTED_FILE_TYPES
 from qwen_agent.tools.base import BaseTool, register_tool
 from qwen_agent.tools.storage import KeyNotExistsError, Storage
 from qwen_agent.utils.str_processing import rm_cid, rm_continuous_placeholders, rm_hexadecimal
@@ -318,9 +318,6 @@ def table_converter(table):
     return table_string
 
 
-PARSER_SUPPORTED_FILE_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls']
-
-
 def get_plain_doc(doc: list):
     paras = []
     for page in doc:
@@ -416,6 +413,8 @@ class SimpleDocParser(BaseTool):
                 parsed_file = parse_tsv(path, self.extract_image)
             elif f_type in ['xlsx', 'xls']:
                 parsed_file = parse_excel(path, self.extract_image)
+            elif f_type in PARSER_SUPPORTED_FILE_TYPES:
+                parsed_file = parse_txt(path)
             else:
                 raise ValueError(
                     f'Failed: The current parser does not support this file type! Supported types: {"/".join(PARSER_SUPPORTED_FILE_TYPES)}'

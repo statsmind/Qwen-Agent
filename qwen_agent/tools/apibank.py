@@ -12,6 +12,9 @@ from qwen_agent.tools.base import ApiBaseTool, register_tool
 from qwen_agent.tools.doc_parser import Record, Chunk
 
 
+API_FUNCS: Dict[str, ApiBaseTool] = {}
+
+
 @register_tool("apibank")
 class ApiBank(BaseTool):
     description = '获取外部工具列表'
@@ -27,33 +30,38 @@ class ApiBank(BaseTool):
         super().__init__(cfg)
 
     def call(self, params: Union[str, dict], **kwargs) -> List[ApiBaseTool]:
+        global API_FUNCS
+
         if isinstance(params, str):
             params = json.loads(params)
         query = params.get("query", "")
 
-        api_dicts = self.parse_openapi_json("http://api.portal.clinify.cn/openapi.json")
-        max_content_len = np.max([len(api_dict['name_for_human'] + ", " + api_dict['description']) for api_dict in api_dicts])
-        max_query_repeat = (max_content_len + len(query) - 1) // len(query)
-        max_query = "\n".join([query for _ in range(max_query_repeat)])
+        if len(API_FUNCS) == 0:
+            api_dicts = self.parse_openapi_json("http://api.portal.clinify.cn/openapi.json")
+            # max_content_len = np.max([len(api_dict['name_for_human'] + ", " + api_dict['description']) for api_dict in api_dicts])
+            # max_query_repeat = (max_content_len + len(query) - 1) // len(query)
+            # max_query = "\n".join([query for _ in range(max_query_repeat)])
+            API_FUNCS = self.create_functions(api_dicts)
 
-        api_funcs: Dict[str, ApiBaseTool] = self.create_functions(api_dicts)
-        api_docs = [
-            Record(
-                url=api_dict['name'],
-                title=api_dict['name_for_human'],
+        api_docs = [self.api_base_tool_to_record(api_func) for api_func in API_FUNCS.values()]
+
+        hybrid_search = HybridSearch(cfg={"rag_searchers": ['keyword_search', 'vector_search']})
+        result = hybrid_search.search(json.dumps({"text": query}, ensure_ascii=False), api_docs, max_doc_num=5)
+        return [API_FUNCS[record['url']] for record in result]
+
+    @classmethod
+    def api_base_tool_to_record(cls, api_func: ApiBaseTool) -> Record:
+        return Record(
+                url=api_func.name,
+                title=api_func.name_for_human,
                 raw=[
                     Chunk(
-                        content=api_dict['name_for_human'] + ", " + api_dict['description'],
-                        metadata={'name': api_dict['name'], 'source': api_dict['name'], 'chunk_id': 0},
+                        content=api_func.name_for_human + ", " + api_func.description,
+                        metadata={'name': api_func.name, 'source': api_func.name, 'chunk_id': 0},
                         token=10,
                     )
                 ]
             )
-            for index, api_dict in enumerate(api_dicts)]
-
-        hybrid_search = HybridSearch(cfg={"rag_searchers": ['keyword_search', 'vector_search']})
-        search_result = hybrid_search.search(json.dumps({"text": max_query}, ensure_ascii=False), api_docs, max_doc_num=5)
-        return [api_funcs[result['url']] for result in search_result]
 
     @classmethod
     def create_functions(cls, api_dicts: List[Dict]) -> Dict[str, ApiBaseTool]:
@@ -79,7 +87,6 @@ class ApiBank(BaseTool):
             })
 
         return api_dicts
-
 
     @classmethod
     def map_path(cls, obj, *paths):

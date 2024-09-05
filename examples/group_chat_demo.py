@@ -10,13 +10,13 @@ from qwen_agent.llm.schema import ContentItem, Message
 
 
 def init_agent_service(cfgs):
-    llm_cfg = {'model': 'qwen-max'}
+    llm_cfg = {"model": "qwen2-72b-instruct", "generate_cfg": {"max_input_tokens": 31000}}
     bot = GroupChat(agents=cfgs, llm=llm_cfg)
     return bot
 
 
 def init_agent_service_create():
-    llm_cfg = {'model': 'qwen-max'}
+    llm_cfg = {"model": "qwen2-72b-instruct", "generate_cfg": {"max_input_tokens": 31000}}
     bot = GroupChatCreator(llm=llm_cfg)
     return bot
 
@@ -36,7 +36,7 @@ app_global_para = {
 # Initialized group chat configuration
 CFGS = {
     'background':
-        '一个陌生人互帮互助群聊',
+        '项目开发群聊',
     'agents': [
         {
             'name': '小塘',
@@ -44,30 +44,41 @@ CFGS = {
             'is_human': True  # mark this as a real person
         },
         {
-            'name': '甄嬛',
-            'description': '一位后宫妃嫔',
-            'instructions': '你是甄嬛，你正在想办法除掉皇后，你说话风格为文言文，每次说完话会调image_gen工具画一幅图，展示心情。',
+            'name': '周辉',
+            'description': '产品经理',
+            'instructions': '你是周辉，负责产品设计。',
             'knowledge_files': [],
-            'selected_tools': ['image_gen']
+            'selected_tools': []
         },
         {
-            'name': 'ikun',
-            'description': '熟悉蔡徐坤的动态',
-            'instructions': '你是蔡徐坤的粉丝，说话很简短，喜欢用颜文字表达心情，你最近迷恋看《甄嬛传》',
+            'name': '坤超',
+            'description': '需求分析师',
+            'instructions': '你是坤超，需求分析师，负责把小塘的要求转化为软件需求。',
             'knowledge_files': [],
             'selected_tools': []
         },
         {
             'name': '大头',
-            'description': '是一个体育生，不喜欢追星',
-            'instructions': '你是一个体育生，热爱运动，你不喜欢追星，你喜欢安利别人健身',
-            'knowledge_files': [],
+            'description': '前端工程师',
+            'instructions': '你是一个前端工程师，熟悉 angular 编程，负责前端开发',
+            'knowledge_files': [
+                'https://www.tup.com.cn/upload/books/yz/082587-01.pdf'
+            ],
+            'selected_tools': []
+        },
+        {
+            'name': '王东',
+            'description': '后端工程师',
+            'instructions': '你是一个后端工程师，熟悉 java spring 框架，负责后端开发',
+            'knowledge_files': [
+                'http://wenku.uml.com.cn/document/java/spring%E4%B8%AD%E6%96%87%E6%95%99%E7%A8%8Bpdf.pdf'
+            ],
             'selected_tools': []
         }
     ]
 }
 
-MAX_ROUND = 3
+MAX_ROUND = 30
 
 
 def app(cfgs):
@@ -145,7 +156,7 @@ def app(cfgs):
         app_global_para['messages'].extend(response)
 
 
-def test():
+def app_test():
     app(cfgs=CFGS)
 
 

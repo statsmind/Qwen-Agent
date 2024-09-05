@@ -64,7 +64,7 @@ def app_test(query: str = "draw a software architecture diagram, user's text inp
         {'role': 'assistant', 'content': "好的，这就为你画"},
         {'role': 'user', 'content': "旁边有条狗"},
         {'role': 'assistant', 'content': "好的，这就为你画"},
-        {'role': 'user', 'content': "查询东方国信的相关资讯"}
+        {'role': 'user', 'content': "最近一个月的国际大事"}
     ]
     for response in bot.run(messages=messages):
         print('bot response:', response)
@@ -102,6 +102,6 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    # app_test()
+    app_test()
     # app_tui()
-    app_gui()
+    # app_gui()

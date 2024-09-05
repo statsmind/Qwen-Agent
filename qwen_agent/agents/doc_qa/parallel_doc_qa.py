@@ -74,10 +74,10 @@ class ParallelDocQA(Assistant):
         for file in valid_files:
             # here to split docs, we should decide chunc size by input doc token length
             # if a document's tokens are below this max_ref_token, it will remain unchunked.
-            _record = self.doc_parse.call(params={'url': file},
-                                          parser_page_size=PARALLEL_CHUNK_SIZE,
-                                          max_ref_token=PARALLEL_CHUNK_SIZE)
-            records.append(_record)
+            _records = self.doc_parse.call(params={'url': file},
+                                           parser_page_size=PARALLEL_CHUNK_SIZE,
+                                           max_ref_token=PARALLEL_CHUNK_SIZE)
+            records.extend(_records)
         return records
 
     def _retrieve_according_to_member_responses(

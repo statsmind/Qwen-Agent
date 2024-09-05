@@ -16,3 +16,4 @@ DEFAULT_QUERYGEN_STRATEGY: Literal['None', 'GenQuery'] = 'GenQuery'
 DEFAULT_RAG_KEYGEN_STRATEGY: Literal['None', 'GenKeyword', 'SplitQueryThenGenKeyword', 'GenKeywordWithKnowledge',
                                      'SplitQueryThenGenKeywordWithKnowledge'] = 'SplitQueryThenGenKeyword'
 DEFAULT_RAG_SEARCHERS: List[str] = ['keyword_search', 'front_page_search']  # Sub-searchers for hybrid retrieval
+PARSER_SUPPORTED_FILE_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'js', 'ts', 'css', 'scss', 'json']

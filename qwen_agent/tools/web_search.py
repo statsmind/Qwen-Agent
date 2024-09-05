@@ -11,37 +11,47 @@ from qwen_agent.tools.base import register_tool
 
 @register_tool("web_search")
 class WebSearch(BaseTool):
-    description = '根据关键字搜索相关信息'
-    parameters = [{'name': 'query', 'type': 'string', 'description': '搜索关键字', 'required': True}]
+    description = '根据关键字搜索相关网页'
+    parameters = [
+        {'name': 'query', 'type': 'string', 'description': '搜索关键字', 'required': True},
+        {
+            'name': 'date_range',
+            'type': 'string',
+            'description': '搜索时间范围, y: 最近一年; m: 最近一个月; d: 最近一天; 空表示无时间限制',
+            "enum": ["y", "m", "d", ""],
+            'default': '',
+            'required': False
+        },
+    ]
 
     def call(self, params: Union[str, dict], **kwargs) -> Union[str, List[ContentItem]]:
         params = self._verify_json_format_args(params)
 
         serp_url = "https://google.serper.dev/search"
-        serp_api_key = os.environ["SERP_API_KEY"]
+        serp_api_key = os.environ.get("SERP_API_KEY", "")
+        if not serp_api_key:
+            raise ValueError("SERP_API_KEY env variable not set")
 
-        payload = json.dumps({
-            "q": params.get("query", ""),
-            "gl": "cn",
-            "hl": "zh-cn"
-        })
-        headers = {
-            'X-API-KEY': serp_api_key,
-            'Content-Type': 'application/json'
-        }
+        query = params.get("query", "").strip()
+        if not query:
+            return []
 
-        result = []
-        response: dict = requests.request("POST", serp_url, headers=headers, data=payload).json()
+        payload = {"q": query, "gl": "cn", "hl": "zh-cn"}
 
-        if 'organic' in response and response['organic']:
-            for item in response['organic']:
-                item = {
-                    'title': item.get('title', ''),
-                    'snippet': item.get('snippet', ''),
-                    'date': item.get('date', ''),
-                    'link': item.get('link', '')
-                }
-                result.append(item)
+        date_range = params.get("date_range", "")
+        if date_range in ["y", "m", "d"]:
+            payload["tbs"] = f"qdr:{date_range}"
 
-        files = [item['link'] for item in result]
-        return [ContentItem(file=file) for file in files]
+        payload = json.dumps(payload, ensure_ascii=False)
+        headers = {'X-API-KEY': serp_api_key, 'Content-Type': 'application/json'}
+        try:
+            response: dict = requests.request("POST", serp_url, headers=headers, data=payload, timeout=10).json()
+
+            if 'organic' in response and response['organic']:
+                files = [item['link'] for item in response['organic']]
+            else:
+                files = []
+
+            return [ContentItem(file=file) for file in files]
+        except:
+            return []

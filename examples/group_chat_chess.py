@@ -38,8 +38,8 @@ CFGS = {
 }
 
 
-def test(query: str = '<1,1>'):
-    bot = GroupChat(agents=CFGS, llm={'model': 'qwen-max'})
+def app_test(query: str = '<1,1>'):
+    bot = GroupChat(agents=CFGS, llm={})
 
     messages = [Message('user', query, name=USER_NAME)]
     for response in bot.run(messages=messages):
@@ -62,7 +62,7 @@ def app_tui():
 
 def app_gui():
     # Define a group chat agent from the CFGS
-    bot = GroupChat(agents=CFGS, llm={'model': 'qwen-max'})
+    bot = GroupChat(agents=CFGS, llm={})
     chatbot_config = {
         'user.name': '小塘',
         'prompt.suggestions': [

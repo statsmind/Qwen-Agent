@@ -45,20 +45,23 @@ class FnCallAgent(Agent):
             # Default to use Memory to manage files
             self.mem = Memory(llm=self.llm, files=files, **kwargs)
 
+        self.auto_tools = kwargs.get("auto_tools", False)
+
     def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
 
-        # 第一步，总结独立问题，方便搜索工具
-        last = last_item(GenQuery(llm=self.llm).run(messages))
-        if last:
-            query = last[-1].text_content()
-        else:
-            query = extract_text_from_message(messages[-1], add_upload_info=False)
+        if self.auto_tools:
+            # 第一步，总结独立问题，方便搜索工具
+            last = last_item(GenQuery(llm=self.llm).run(messages))
+            if last:
+                query = last[-1].text_content()
+            else:
+                query = extract_text_from_message(messages[-1], add_upload_info=False)
 
-        # 第二步，搜索合适的工具
-        searched_tools = ApiBank().call({"query": query})
-        for tool in searched_tools:
-            self.init_tool(tool)
+            # 第二步，搜索合适的工具
+            searched_tools = ApiBank().call({"query": query})
+            for tool in searched_tools:
+                self.init_tool(tool)
 
         num_llm_calls_available = MAX_LLM_CALL_PER_RUN
         response = []

@@ -119,7 +119,7 @@ def string_tokenizer(text: str) -> List[str]:
     text = text.lower().strip()
     if has_chinese_chars(text):
         import jieba
-        _wordlist_tmp = list(jieba.lcut(text))
+        _wordlist_tmp = list(jieba.__lcut(text))
         _wordlist = []
         for word in _wordlist_tmp:
             if not all(char in PUNCTUATIONS for char in word):

@@ -2,6 +2,7 @@ env
 *.pyc
 __pycache__
 .env
+.env.bak
 .idea
 .vscode
 .DS_Store

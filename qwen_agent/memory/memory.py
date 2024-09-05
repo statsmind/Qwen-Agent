@@ -1,4 +1,5 @@
 import json
+import os.path
 from importlib import import_module
 from typing import Dict, Iterator, List, Optional, Union, Literal
 
@@ -27,7 +28,8 @@ class Memory(Agent):
                  llm: Optional[Union[Dict, BaseChatModel]] = None,
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
                  files: Optional[List[str]] = None,
-                 rag_cfg: Optional[Dict] = None):
+                 rag_cfg: Optional[Dict] = None,
+                 **kwargs) -> None:
         """Initialization the memory.
 
         Args:
@@ -142,7 +144,15 @@ class Memory(Agent):
         rag_files: List[str] = []
         # detect supported files and remove duplicated
         for file in files:
-            f_type = get_file_type(file)
-            if f_type in PARSER_SUPPORTED_FILE_TYPES and file not in rag_files:
-                rag_files.append(file)
+            if os.path.isdir(file):
+                for dirpath, dirnames, filenames in os.walk(file):
+                    for filename in filenames:
+                        f_type = get_file_type(filename)
+                        fullname = os.path.join(dirpath, filename)
+                        if f_type in PARSER_SUPPORTED_FILE_TYPES and fullname not in rag_files:
+                            rag_files.append(fullname)
+            else:
+                f_type = get_file_type(file)
+                if f_type in PARSER_SUPPORTED_FILE_TYPES and file not in rag_files:
+                    rag_files.append(file)
         return rag_files

@@ -20,7 +20,7 @@ from .user_agent import UserAgent
 from .virtual_memory_agent import VirtualMemoryAgent
 from .write_from_scratch import WriteFromScratch
 
-load_dotenv()
+load_dotenv(override=True)
 
 __all__ = [
     'Agent',
