@@ -19,6 +19,11 @@ def read_description() -> str:
     return long_description
 
 
+# To update the package at PyPI:
+# ```bash
+# python setup.py sdist bdist_wheel
+# twine upload dist/*
+# ```
 setup(
     name='qwen-agent',
     version=get_version(),
@@ -42,6 +47,7 @@ setup(
         'eval_type_backport',
         'json5',
         'jsonlines',
+        'jsonschema',
         'openai',
         'pydantic>=2.3.0',
         'requests',

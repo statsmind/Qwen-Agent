@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 from qwen_agent.agent import Agent
+from qwen_agent.agent import Agent, BasicAgent
 from qwen_agent.multi_agent_hub import MultiAgentHub
 
 from .article_agent import ArticleAgent
@@ -24,6 +25,7 @@ load_dotenv(override=True)
 
 __all__ = [
     'Agent',
+    'BasicAgent',
     'MultiAgentHub',
     'DocQAAgent',
     'ParallelDocQA',
