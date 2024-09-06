@@ -37,6 +37,7 @@ def get_chat_model(cfg: Union[dict, str] = 'qwen-plus') -> BaseChatModel:
     Returns:
         LLM object.
     """
+    cfg = cfg or {}
     if isinstance(cfg, str):
         cfg = {'model': cfg}
 

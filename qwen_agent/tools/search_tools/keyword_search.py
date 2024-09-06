@@ -11,6 +11,12 @@ from qwen_agent.tools.doc_parser import Record
 from qwen_agent.tools.search_tools.base_search import BaseSearch
 from qwen_agent.utils.utils import has_chinese_chars
 
+import jieba
+try:
+    lcut = jieba.lcut
+except:
+    lcut = jieba.__lcut
+
 
 @register_tool('keyword_search')
 class KeywordSearch(BaseSearch):
@@ -118,8 +124,7 @@ def tokenize_and_filter(input_text: str) -> str:
 def string_tokenizer(text: str) -> List[str]:
     text = text.lower().strip()
     if has_chinese_chars(text):
-        import jieba
-        _wordlist_tmp = list(jieba.__lcut(text))
+        _wordlist_tmp = list(lcut(text))
         _wordlist = []
         for word in _wordlist_tmp:
             if not all(char in PUNCTUATIONS for char in word):
