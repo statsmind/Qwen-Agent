@@ -38,12 +38,12 @@ CFGS = {
     'background': 'openhis 云诊所开发群。',
     'agents': [
         {
-            'name': '胡路',
+            'name': '舒高伟',
             'description': '你是需求工程师，负责将客户的功能需传达给研发团队并回答团队关于需求的问题。（这是一个真实用户）',
             'is_human': True  # mark this as a real person
         },
         {
-            'name': '周辉',
+            'name': '张庭玮',
             'description': '前端工程师',
             'instructions': '你负责项目前端页面的开发，你使用的前端框架是 Vue.js，你会根据功能需求给出详细的前端代码实现。',
             'knowledge_files': [
@@ -52,7 +52,7 @@ CFGS = {
             'selected_tools': []
         },
         {
-            'name': '坤超',
+            'name': '李明明',
             'description': '后端工程师',
             'instructions': '你是负责项目后端API接口的开发，你使用的后端框架是 java+spring，你会根据功能需求给出详细的后端代码实现。',
             'knowledge_files': [
@@ -61,7 +61,16 @@ CFGS = {
             'selected_tools': []
         },
         {
-            'name': '大头',
+            'name': '刘龙刚',
+            'description': '测试工程师',
+            'instructions': '你负责设计新开发功能的测试用例，使用 intellij idea 的 http 测试用例格式，包含测试请求例子及预期结果。',
+            'knowledge_files': [
+                'https://blog.csdn.net/millery22/article/details/123566322'
+            ],
+            'selected_tools': []
+        },
+        {
+            'name': '王鑫',
             'description': '产品经理',
             'instructions': '你是资深产品经理，有丰富的医院信息化系统产品经验，熟悉openhis云诊所的功能，并能把需求转化为产品功能需求。',
             'knowledge_files': [
@@ -71,9 +80,9 @@ CFGS = {
             'selected_tools': ['web_search']
         },
         {
-            'name': '李难多',
+            'name': '胡建',
             'description': '代码管理员',
-            'instructions': '你负责对前后端提供的代码进行总结，指定代码的存储路径，并将代码写入到代码仓库里。',
+            'instructions': '你负责对前后端提供的代码进行总结，总结汇报新能涉及代码的存储路径及具体内容。',
             'knowledge_files': [
                 r'D:\workspace\mine\medical2.0\openhis-ui\src',
                 r'D:\workspace\mine\medical2.0\openhis-api\src'
