@@ -327,5 +327,5 @@ with gr.Blocks(theme='soft') as demo:
         demo.load(chat_clear_create, None, [chatbot, chat_txt], queue=False)
 
 if __name__ == '__main__':
-    app_tui()
-    # demo.queue().launch()
+    # app_tui()
+    demo.queue().launch()

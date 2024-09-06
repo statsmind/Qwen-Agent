@@ -18,9 +18,55 @@ from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import StreamingResponse
 
-from qwen_agent.agents import Assistant, ReActChat
+from qwen_agent.agents import Assistant, ReActChat, GroupChat
 from qwen_agent.llm.schema import Message
 from qwen_agent.tools.apibank import ApiBank
+
+# Initialized group chat configuration
+CFGS = {
+    'background':
+        '项目开发群聊',
+    'agents': [
+        {
+            'name': '小塘',
+            'description': '一位软件开发小白。（这是一个真实用户）',
+            'is_human': True  # mark this as a real person
+        },
+        {
+            'name': '周辉',
+            'description': '前端工程师',
+            'instructions': '你是资深前端开发工程师，熟悉项目的Vue前端代码。',
+            'knowledge_files': [
+                r'D:\workspace\mine\medical2.0\openhis-ui\src'
+            ],
+            'selected_tools': []
+        },
+        {
+            'name': '坤超',
+            'description': '后端工程师',
+            'instructions': '你是资深后端开发工程师，熟悉项目的java+spring后端代码。',
+            'knowledge_files': [
+                r'D:\workspace\mine\medical2.0\openhis-api\src'
+            ],
+            'selected_tools': []
+        },
+        {
+            'name': '大头',
+            'description': '产品经理',
+            'instructions': '你是资深产品经理，有丰富的医院信息化系统产品经验',
+            'knowledge_files': [
+                r'D:\workspace\mine\medical2.0\云诊所管理系统操作手册.docx',
+                r'D:\workspace\mine\medical2.0\云诊所管理系统说明书.pdf'
+            ],
+            'selected_tools': ['web_search']
+        }
+    ]
+}
+
+def init_agent_service(cfgs):
+    llm_cfg = {"model": "qwen2-72b-instruct", "generate_cfg": {"max_input_tokens": 31000}}
+    bot = GroupChat(agents=cfgs, llm=llm_cfg)
+    return bot
 
 
 @asynccontextmanager
@@ -37,8 +83,6 @@ logging.getLogger("httpx").disabled = True
 app.logger = logger = logging.getLogger(__name__)
 app.startup_time = int(time.time())
 app.tiktoken_encoder = tiktoken.get_encoding("cl100k_base")
-
-apibank = ApiBank()
 
 
 async def check_api_key(
@@ -82,6 +126,8 @@ async def show_available_models():
 async def create_chat_completion(request: ChatCompletionRequest):
     session_id = uuid.uuid4().hex
     messages = [Message(**msg) for msg in request.messages]
+    messages[-1].name = "小塘"
+    messages = messages[-1:]
 
     previous_contents_cache = {}
 
@@ -92,14 +138,7 @@ async def create_chat_completion(request: ChatCompletionRequest):
         return content[len(previous_content):]
 
     def response_generator():
-        # agent = Assistant(llm={'model': 'qwen2-72b-instruct'})
-        agent = ReActChat(llm={
-                'model': 'qwen2-72b-instruct',
-                'generate_cfg': {"max_input_tokens": 31000}
-            },
-            name='code interpreter',
-            description='This agent can run code to solve the problem',
-            function_list=apibank.functions)
+        agent = init_agent_service(CFGS)
         responses = agent.run(messages)
 
         for items in responses:
