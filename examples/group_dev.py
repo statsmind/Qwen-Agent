@@ -35,18 +35,17 @@ app_global_para = {
 
 # Initialized group chat configuration
 CFGS = {
-    'background':
-        '项目开发群聊',
+    'background': 'openhis 云诊所开发群。',
     'agents': [
         {
-            'name': '小塘',
-            'description': '一位软件开发小白。（这是一个真实用户）',
+            'name': '胡路',
+            'description': '你是需求工程师，负责将客户的功能需传达给研发团队并回答团队关于需求的问题。（这是一个真实用户）',
             'is_human': True  # mark this as a real person
         },
         {
             'name': '周辉',
             'description': '前端工程师',
-            'instructions': '你是资深前端开发工程师，熟悉项目的Vue前端代码。',
+            'instructions': '你负责项目前端页面的开发，你使用的前端框架是 Vue.js，你会根据功能需求给出详细的前端代码实现。',
             'knowledge_files': [
                 r'D:\workspace\mine\medical2.0\openhis-ui\src'
             ],
@@ -55,7 +54,7 @@ CFGS = {
         {
             'name': '坤超',
             'description': '后端工程师',
-            'instructions': '你是资深后端开发工程师，熟悉项目的java+spring后端代码。',
+            'instructions': '你是负责项目后端API接口的开发，你使用的后端框架是 java+spring，你会根据功能需求给出详细的后端代码实现。',
             'knowledge_files': [
                 r'D:\workspace\mine\medical2.0\openhis-api\src'
             ],
@@ -64,17 +63,27 @@ CFGS = {
         {
             'name': '大头',
             'description': '产品经理',
-            'instructions': '你是资深产品经理，有丰富的医院信息化系统产品经验',
+            'instructions': '你是资深产品经理，有丰富的医院信息化系统产品经验，熟悉openhis云诊所的功能，并能把需求转化为产品功能需求。',
             'knowledge_files': [
                 r'D:\workspace\mine\medical2.0\云诊所管理系统操作手册.docx',
                 r'D:\workspace\mine\medical2.0\云诊所管理系统说明书.pdf'
             ],
             'selected_tools': ['web_search']
+        },
+        {
+            'name': '李难多',
+            'description': '代码管理员',
+            'instructions': '你负责对前后端提供的代码进行总结，指定代码的存储路径，并将代码写入到代码仓库里。',
+            'knowledge_files': [
+                r'D:\workspace\mine\medical2.0\openhis-ui\src',
+                r'D:\workspace\mine\medical2.0\openhis-api\src'
+            ],
+            'selected_tools': []
         }
     ]
 }
 
-MAX_ROUND = 30
+MAX_ROUND = 50
 
 
 def app_tui():
@@ -84,7 +93,7 @@ def app_tui():
     messages = []
     while True:
         query = input('user question: ')
-        messages.append(Message('user', query, name="小塘"))
+        messages.append(Message('user', query, name="胡路"))
         response = []
         for response in bot.run(messages=messages):
             print('bot response:', response)
