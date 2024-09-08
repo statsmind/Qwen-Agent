@@ -9,6 +9,7 @@ from qwen_agent.agents.keygen_strategies.split_query import SplitQuery
 from qwen_agent.llm.base import BaseChatModel
 from qwen_agent.llm.schema import ASSISTANT, DEFAULT_SYSTEM_MESSAGE, USER, Message
 from qwen_agent.tools import BaseTool
+from qwen_agent.utils.utils import last_item
 
 
 class SplitQueryThenGenKeyword(Agent):
@@ -25,7 +26,7 @@ class SplitQueryThenGenKeyword(Agent):
     def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         query = messages[-1].content
 
-        *_, last = self.split_query.run(messages=messages, lang=lang, **kwargs)
+        last = last_item(self.split_query.run(messages=messages, lang=lang, **kwargs))
         information = last[-1].content.strip()
         if information.startswith('```json'):
             information = information[len('```json'):]

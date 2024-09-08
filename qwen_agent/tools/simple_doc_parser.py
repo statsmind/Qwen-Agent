@@ -90,6 +90,23 @@ def parse_txt(path: str):
     return [{'page_num': 1, 'content': content}]
 
 
+def parse_sql(path: str):
+    text = read_text_from_file(path)
+    paras = text.split(';')
+    content = []
+    for p in paras:
+        if p.strip():
+            content.append({'text': p})
+
+    # Due to the pages in txt are not fixed, the entire document is returned as one page
+    return [{'page_num': 1, 'content': content}]
+
+
+def parse_code(path: str):
+    text = read_text_from_file(path)
+    return [{'page_num': 1, 'content': text}]
+
+
 def df_to_md(df) -> str:
 
     def replace_long_dashes(text):
@@ -377,9 +394,9 @@ class SimpleDocParser(BaseTool):
             except ValueError:
                 logger.warning(f'Encountered ValueError raised by json5. Fall back to json. File: {cached_name_ori}')
                 parsed_file = json.loads(parsed_file)
-            logger.info(f'Read parsed {path} from cache.')
+            logger.debug(f'Read parsed {path} from cache.')
         except KeyNotExistsError:
-            logger.info(f'Start parsing {path}...')
+            logger.debug(f'Start parsing {path}...')
             time1 = time.time()
 
             f_type = get_file_type(path)
@@ -413,6 +430,10 @@ class SimpleDocParser(BaseTool):
                 parsed_file = parse_tsv(path, self.extract_image)
             elif f_type in ['xlsx', 'xls']:
                 parsed_file = parse_excel(path, self.extract_image)
+            elif f_type == 'sql':
+                parsed_file = parse_sql(path)
+            elif f_type in ['java', 'kt', 'js', 'ts', 'css', 'scss', 'vue']:
+                parsed_file = parse_code(path)
             elif f_type in PARSER_SUPPORTED_FILE_TYPES:
                 parsed_file = parse_txt(path)
             else:
@@ -424,7 +445,7 @@ class SimpleDocParser(BaseTool):
                     # Todo: More attribute types
                     para['token'] = count_tokens(para.get('text', para.get('table')))
             time2 = time.time()
-            logger.info(f'Finished parsing {path}. Time spent: {time2 - time1} seconds.')
+            logger.debug(f'Finished parsing {path}. Time spent: {time2 - time1} seconds.')
             # Cache the parsing doc
             self.db.put(cached_name_ori, json.dumps(parsed_file, ensure_ascii=False, indent=2))
 

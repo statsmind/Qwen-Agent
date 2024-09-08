@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict, Iterator, List, Optional, Union, Literal
 
 from qwen_agent import Agent
 from qwen_agent.llm import BaseChatModel
@@ -8,16 +8,18 @@ from qwen_agent.utils.utils import has_chinese_chars
 
 
 class GroupChatAutoRouter(Agent):
-    PROMPT_TEMPLATE_ZH = '''你扮演角色扮演游戏的上帝，你的任务是选择合适的发言角色。有如下角色：
+    PROMPT_TEMPLATE_ZH = '''你扮演角色扮演游戏的上帝，你的任务是选择合适的发言角色，角色扮演游戏的设定是：{background}。
+有如下角色：
 {agent_descs}
 
 角色间的对话历史格式如下，越新的对话越重要：
 角色名: 说话内容
 
-请阅读对话历史，并选择下一个合适的发言角色，从 [{agent_names}] 里选，当真实用户最近表明了停止聊天时，或话题应该终止时，请返回“[STOP]”，用户很懒，非必要不要选真实用户。
+请阅读对话历史，并选择下一个合适的发言角色，从 [{agent_names}] 里选，当真实用户最近表明了停止聊天时，或话题应该终止时，请返回“[STOP]”，用户很懒，不要选真实用户。
 仅返回角色名或“[STOP]”，不要返回其余内容。'''
 
-    PROMPT_TEMPLATE_EN = '''You are in a role play game. The following roles are available:
+    PROMPT_TEMPLATE_EN = '''You are in a role play game: {background}.
+The following roles are available:
 {agent_descs}
 
 The format of dialogue history between roles is as follows:
@@ -38,14 +40,18 @@ Only return the role name from [{agent_names}] or '[STOP]'. Do not reply any oth
                  agents: List[Agent] = None,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
+                 background: str = '',
                  **kwargs):
+        from qwen_agent.agents import UserAgent
         # This agent need prepend special system message according to inputted agents
         agent_descs = '\n'.join([f'{x.name}: {x.description}' for x in agents])
-        lang = 'zh'
+        agent_names = ', '.join([x.name for x in agents if not isinstance(x, UserAgent) or x.should_interrupt])
+        lang = 'en'
         if has_chinese_chars(agent_descs):
             lang = 'zh'
-        system_prompt = self.PROMPT_TEMPLATE[lang].format(agent_descs=agent_descs,
-                                                          agent_names=', '.join([x.name for x in agents]))
+        system_prompt = self.PROMPT_TEMPLATE['en'].format(agent_descs=agent_descs,
+                                                          agent_names=agent_names,
+                                                          background=background)
 
         super().__init__(function_list=function_list,
                          llm=llm,
@@ -54,7 +60,7 @@ Only return the role name from [{agent_names}] or '[STOP]'. Do not reply any oth
                          description=description,
                          **kwargs)
 
-    def _run(self, messages: List[Message], lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
+    def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'en', **kwargs) -> Iterator[List[Message]]:
 
         dialogue = []
         for msg in messages:

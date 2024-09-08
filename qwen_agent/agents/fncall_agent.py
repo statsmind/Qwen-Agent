@@ -21,7 +21,7 @@ class FnCallAgent(Agent):
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
-                 files: Optional[List[str]] = None,
+                 files: Optional[List[Union[str, Dict]]] = None,
                  **kwargs):
         """Initialization the agent.
 

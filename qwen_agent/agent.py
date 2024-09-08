@@ -21,7 +21,7 @@ class Agent(ABC):
 
     def __init__(self,
                  function_list: Optional[List[Union[str, Dict, BaseTool]]] = None,
-                 llm: Optional[Union[dict, BaseChatModel]] = None,
+                 llm: Optional[Union[Dict, BaseChatModel]] = None,
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
@@ -48,7 +48,7 @@ class Agent(ABC):
             for tool in function_list:
                 self.init_tool(tool)
 
-        self.system_message = system_message or self.SYSTEM_MESSAGE
+        self.system_message = system_message
         self.name = name
         self.description = description
 

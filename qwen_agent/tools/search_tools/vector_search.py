@@ -2,9 +2,12 @@ import json
 import os
 from typing import List, Tuple
 
+import torch
+
 from qwen_agent.tools.base import register_tool
 from qwen_agent.tools.doc_parser import Record
 from qwen_agent.tools.search_tools.base_search import BaseSearch
+from qwen_agent.tools.search_tools.cached_embeddings import CachedEmbeddings
 
 
 @register_tool('vector_search')
@@ -19,6 +22,8 @@ class VectorSearch(BaseSearch):
             raise ModuleNotFoundError('Please install langchain by: `pip install langchain`')
         try:
             from langchain_community.embeddings import DashScopeEmbeddings
+            from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+            from langchain_community.embeddings import OllamaEmbeddings
             from langchain_community.vectorstores import FAISS
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
@@ -39,9 +44,16 @@ class VectorSearch(BaseSearch):
             for chk in doc.raw:
                 all_chunks.append(Document(page_content=chk.content[:2000], metadata=chk.metadata))
 
-        embeddings = DashScopeEmbeddings(model='text-embedding-v2',
-                                         dashscope_api_key=os.getenv('DASHSCOPE_API_KEY', ''))
+        # embeddings = DashScopeEmbeddings(model='text-embedding-v2',
+        #                                  dashscope_api_key=os.getenv('DASHSCOPE_API_KEY', ''))
+        bge_embeddings = HuggingFaceBgeEmbeddings(
+            model_name='BAAI/bge-m3',
+            model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
+            encode_kwargs={'normalize_embeddings': True}
+        )
+        embeddings = CachedEmbeddings(bge_embeddings)
         db = FAISS.from_documents(all_chunks, embeddings)
         chunk_and_score = db.similarity_search_with_score(query, k=len(all_chunks))
 
-        return [(chk.metadata['source'], chk.metadata['chunk_id'], 1.0 / (score + 0.000001)) for chk, score in chunk_and_score]
+        return [(chk.metadata['source'], chk.metadata['chunk_id'], 1.0 / (score + 1e-6)) for chk, score in
+                chunk_and_score]

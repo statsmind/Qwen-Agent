@@ -14,6 +14,7 @@ class SplitQuery(GenKeyword):
 {{"information": ["information fragment 1", "information fragment 2"], "instruction": ["instruction fragment 1", "instruction fragment 2"]}}.
 If it is a question, the default task description is: Answer the question
 
+# Examples
 Question: What is MMDET.UTILS?
 Result: {{"information": ["What is MMDET.UTILS"], "instruction": ["Answer the question"]}}
 Observation: ...
@@ -30,6 +31,7 @@ Question: Help me count the performance of membership levels.
 Result: {{"information": ["the performance of membership levels"], "instruction": ["Help me count"]}}
 Observation: ...
 
+# Begin!
 Question: {user_request}
 Result:
 """
@@ -37,6 +39,7 @@ Result:
     PROMPT_TEMPLATE_ZH = """请提取问题中的可以帮助检索的重点信息片段和任务描述，以JSON的格式给出：{{"information": ["重点信息片段1", "重点信息片段2"], "instruction": ["任务描述片段1", "任务描述片段2"]}}。
 如果是提问，则默认任务描述为：回答问题
 
+# 例子
 Question: MMDET.UTILS是什么
 Result: {{"information": ["MMDET.UTILS是什么"], "instruction": ["回答问题"]}}
 Observation: ...
@@ -53,6 +56,7 @@ Question: 帮我统计不同会员等级的业绩
 Result: {{"information": ["会员等级的业绩"], "instruction": ["帮我统计"]}}
 Observation: ...
 
+# 开始
 Question: {user_request}
 Result:
 """
@@ -76,9 +80,11 @@ Result:
         )
 
     def _run(self, messages: List[Message], lang: Literal['en', 'zh'] = 'zh', **kwargs) -> Iterator[List[Message]]:
-        # for last in super()._run(messages=messages, lang=lang, **kwargs):
-        #     continue
         last = last_item(super()._run(messages=messages, lang=lang, **kwargs))
+        if last is None:
+            yield [Message(role=ASSISTANT, content='')]
+            return
+
         extracted_content = last[-1].content.strip()
         logger.info(f'Extracted info from query: {extracted_content}')
         if extracted_content.endswith('}') or extracted_content.endswith('```'):

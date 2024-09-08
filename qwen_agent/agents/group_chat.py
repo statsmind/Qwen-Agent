@@ -56,13 +56,15 @@ class GroupChat(Agent, MultiAgentHub):
         self.agent_selection_method = agent_selection_method
 
         if isinstance(agents, dict):
+            background = agents['background']
             self._agents = self._init_agents_from_config(agents, llm=llm)
         else:
+            background = ''
             self._agents = agents
 
         if self.agent_selection_method == 'auto':
             assert llm is not None, 'Need to provide LLM to the host in auto mode'
-            self.host = GroupChatAutoRouter(function_list=function_list, llm=llm, agents=self.agents, name='host')
+            self.host = GroupChatAutoRouter(function_list=function_list, llm=llm, agents=self.agents, name='host', background=background)
 
     def _run(self,
              messages: List[Message] = None,
@@ -147,6 +149,9 @@ class GroupChat(Agent, MultiAgentHub):
             logger.info(f'selected_agent_name: {selected_agent.name}')
             new_messages = self._manage_messages(messages, selected_agent.name)
             for rsp in selected_agent.run(messages=new_messages, **kwargs):
+                for item in rsp:
+                    if isinstance(item.content, str) and item.content.startswith(selected_agent.name + ':'):
+                        item.content = item.content[len(selected_agent.name) + 1:].strip()
                 yield rsp
         else:
             yield []
@@ -170,7 +175,11 @@ class GroupChat(Agent, MultiAgentHub):
                 if 'text' in last[-1]['content'][0]:
                     auto_selected_agent = last[-1]['content'][0]['text']
             if auto_selected_agent in agents_map.keys():
-                return agents_map[auto_selected_agent]
+                selected_agent = agents_map[auto_selected_agent]
+                if isinstance(selected_agent, UserAgent) and not selected_agent.should_interrupt:
+                    return random.choice(list(self.agents))
+                else:
+                    return agents_map[auto_selected_agent]
             elif auto_selected_agent == '[STOP]':
                 return None
 
@@ -251,15 +260,15 @@ class GroupChat(Agent, MultiAgentHub):
     def _init_agents_from_config(self, cfgs: Dict, llm: Optional[Union[Dict, BaseChatModel]] = None) -> List[Agent]:
 
         def _build_system_from_role_config(config: Dict):
-            role_chat_prompt = """你是{name}。{description}\n\n{instructions}"""
+            role_chat_prompt = """你是{name}，{description}\n\n{instructions}"""
 
             name = config.get('name', '').strip()
             description = config.get('description', '').lstrip('\n').rstrip()
             instructions = config.get('instructions', '').lstrip('\n').rstrip()
-            if len(instructions) >= len(description):
-                description = ''  # redundant, as we already have instructions
-            else:
-                description = f'你的简介是：{description}'
+            # if len(instructions) >= len(description):
+            #     description = ''  # redundant, as we already have instructions
+            # else:
+            #     description = f'你的简介是：{description}'
             prompt = role_chat_prompt.format(name=name, description=description, instructions=instructions)
 
             knowledge_files = config.get('knowledge_files', [])
@@ -275,13 +284,21 @@ class GroupChat(Agent, MultiAgentHub):
             system, knowledge_files, selected_tools = _build_system_from_role_config(cfg)
             if 'is_human' in cfg and cfg['is_human']:
                 # Append human agent
-                agents.append(UserAgent(name=cfg['name'], description=cfg['description']))
+                agents.append(UserAgent(
+                    name=cfg['name'],
+                    description=cfg['description'],
+                    should_interrupt=cfg.get('should_interrupt', False)
+                ))
             else:
                 # Create npc agent by config
                 other_agents = []
                 for x in cfgs['agents']:
                     if x['name'] != cfg['name']:
                         other_agents.append(x['name'])
+
+                if 'llm' in cfg:
+                    llm = cfg['llm']
+
                 agents.append(
                     Assistant(llm=llm,
                               system_message=groupchat_background + system +

@@ -30,65 +30,97 @@ app_global_para = {
     'messages_create': [],
     'is_first_upload': False,
     'uploaded_file': '',
-    'user_interrupt': True
+    'user_interrupt': False
 }
 
 # Initialized group chat configuration
 CFGS = {
-    'background': 'openhis 云诊所开发群。',
+    'background': 'openhis 云诊所开发项目组，需求工程师给出需求后，项目组其他工程师完成相关的代码。',
     'agents': [
         {
             'name': '舒高伟',
-            'description': '你是需求工程师，负责将客户的功能需传达给研发团队并回答团队关于需求的问题。（这是一个真实用户）',
-            'is_human': True  # mark this as a real person
+            'description': '一位需求工程师(这是一个真实用户)',
+            'instructions': '负责把客户的需求传达给项目组进行开发。',
+            'is_human': True,
+            'should_interrupt': False
         },
         {
             'name': '张庭玮',
-            'description': '前端工程师',
-            'instructions': '你负责项目前端页面的开发，你使用的前端框架是 Vue.js，你会根据功能需求给出详细的前端代码实现。',
+            'description': '一位前端工程师',
+            'instructions': '项目目前使用的前端框架是 Vue.js，你的任务是根据功能需求和已有代码开发前端页面代码。',
+            'llm': {
+                'model': 'codeqwen1.5-7b-chat',
+                'generate_cfg': {
+                    'max_input_tokens': 31000
+                }
+            },
             'knowledge_files': [
-                r'D:\workspace\mine\medical2.0\openhis-ui\src'
+                {
+                    "path": r'D:\workspace\mine\medical2.0\openhis-ui\src',
+                    "excludes": [
+                        r'\/resources\/',
+                        r'\/lang\/',
+                        r'resource\.js'
+                    ]
+                }
             ],
             'selected_tools': []
         },
         {
             'name': '李明明',
-            'description': '后端工程师',
-            'instructions': '你是负责项目后端API接口的开发，你使用的后端框架是 java+spring，你会根据功能需求给出详细的后端代码实现。',
+            'description': '一位后端工程师',
+            'instructions': '项目目前使用的后端框架是 spring boot，你的任务是根据功能需求和已有代码开发后端服务及接口代码。',
+            'llm': {
+                'model': 'codeqwen1.5-7b-chat',
+                'generate_cfg': {
+                    'max_input_tokens': 31000
+                }
+            },
             'knowledge_files': [
-                r'D:\workspace\mine\medical2.0\openhis-api\src'
+                {
+                    "path": r'D:\workspace\mine\medical2.0\openhis-api\src',
+                    "excludes": [
+                        r'\/resources\/',
+                        r'resource\.js'
+                    ]
+                }
             ],
             'selected_tools': []
         },
         {
-            'name': '刘龙刚',
-            'description': '测试工程师',
-            'instructions': '你负责设计新开发功能的测试用例，使用 intellij idea 的 http 测试用例格式，包含测试请求例子及预期结果。',
+            'name': '安歌',
+            'description': '一位数据库DBA',
+            'instructions': '负责根据功能需求进行数据库表结构的创建及修改。',
+            'llm': {
+                'model': 'codeqwen1.5-7b-chat',
+                'generate_cfg': {
+                    'max_input_tokens': 31000
+                }
+            },
             'knowledge_files': [
-                'https://blog.csdn.net/millery22/article/details/123566322'
+                r'D:\workspace\mine\medical2.0\schema.sql'
             ],
             'selected_tools': []
         },
-        {
-            'name': '王鑫',
-            'description': '产品经理',
-            'instructions': '你是资深产品经理，有丰富的医院信息化系统产品经验，熟悉openhis云诊所的功能，并能把需求转化为产品功能需求。',
-            'knowledge_files': [
-                r'D:\workspace\mine\medical2.0\云诊所管理系统操作手册.docx',
-                r'D:\workspace\mine\medical2.0\云诊所管理系统说明书.pdf'
-            ],
-            'selected_tools': ['web_search']
-        },
-        {
-            'name': '胡建',
-            'description': '代码管理员',
-            'instructions': '你负责对前后端提供的代码进行总结，总结汇报新能涉及代码的存储路径及具体内容。',
-            'knowledge_files': [
-                r'D:\workspace\mine\medical2.0\openhis-ui\src',
-                r'D:\workspace\mine\medical2.0\openhis-api\src'
-            ],
-            'selected_tools': []
-        }
+        # {
+        #     'name': '刘龙刚',
+        #     'description': '一位测试工程师',
+        #     'instructions': '任务是根据功能需求进行测试用例开发，你使用的工具是 Intellij Idea Http Client。',
+        #     'knowledge_files': [
+        #         'https://blog.csdn.net/millery22/article/details/123566322'
+        #     ],
+        #     'selected_tools': []
+        # },
+        # {
+        #     'name': '王鑫',
+        #     'description': '一位项目经理',
+        #     'instructions': '有丰富的医院信息化系统项目管理经验，熟悉openhis云诊所的功能，你安排团队成员的工作。你不需要向任何人询问关于需求的信息，你决定一切。',
+        #     'knowledge_files': [
+        #         r'D:\workspace\mine\medical2.0\云诊所管理系统操作手册.docx',
+        #         r'D:\workspace\mine\medical2.0\云诊所管理系统说明书.pdf'
+        #     ],
+        #     'selected_tools': []
+        # }
     ]
 }
 
@@ -98,11 +130,18 @@ MAX_ROUND = 50
 def app_tui():
     # Define a group chat agent from the CFGS
     bot = init_agent_service(CFGS)
+    message_queue = [
+        '客户想在患者登记页去掉身份证录入'
+    ]
     # Chat
     messages = []
     while True:
-        query = input('user question: ')
-        messages.append(Message('user', query, name="胡路"))
+        if len(message_queue) > 0:
+            query = message_queue.pop()
+        else:
+            query = input('user question: ')
+
+        messages.append(Message('user', query, '舒高伟'))
         response = []
         for response in bot.run(messages=messages):
             print('bot response:', response)
@@ -139,12 +178,16 @@ def app(cfgs):
             else:
                 content = messages[-1].content.strip()
         if '@' in content:
-            for x in content.split('@'):
-                for agent in cfgs['agents']:
-                    if x.startswith(agent['name']):
-                        if agent['name'] not in mentioned_agents_name:
-                            mentioned_agents_name.append(agent['name'])
-                        break
+            parts = content.split('@')
+            if len(parts) > 1:
+                parts = parts[1:]
+
+                for x in parts:
+                    for agent in cfgs['agents']:
+                        if x.startswith(agent['name']):
+                            if agent['name'] not in mentioned_agents_name:
+                                mentioned_agents_name.append(agent['name'])
+                            break
         # Get one response from groupchat
         response = []
         try:

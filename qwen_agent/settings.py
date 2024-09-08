@@ -10,10 +10,12 @@ MAX_LLM_CALL_PER_RUN: int = 8
 DEFAULT_WORKSPACE: str = 'workspace'
 
 # Settings for RAG
-DEFAULT_MAX_REF_TOKEN: int = 4000  # The window size reserved for RAG materials
+DEFAULT_MAX_REF_TOKEN: int = 20000  # The window size reserved for RAG materials
 DEFAULT_PARSER_PAGE_SIZE: int = 500  # Max tokens per chunk when doing RAG
 DEFAULT_QUERYGEN_STRATEGY: Literal['None', 'GenQuery'] = 'GenQuery'
-DEFAULT_RAG_KEYGEN_STRATEGY: Literal['None', 'GenKeyword', 'SplitQueryThenGenKeyword', 'GenKeywordWithKnowledge',
-                                     'SplitQueryThenGenKeywordWithKnowledge'] = 'SplitQueryThenGenKeyword'
-DEFAULT_RAG_SEARCHERS: List[str] = ['keyword_search', 'front_page_search']  # Sub-searchers for hybrid retrieval
-PARSER_SUPPORTED_FILE_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'java', 'kt', 'js', 'ts', 'css', 'scss', 'json']
+DEFAULT_RAG_KEYGEN_STRATEGY: Literal[
+    'None', 'GenKeyword', 'SplitQueryThenGenKeyword', 'GenKeywordWithKnowledge',
+    'SplitQueryThenGenKeywordWithKnowledge'] = 'SplitQueryThenGenKeyword'
+DEFAULT_RAG_SEARCHERS: List[str] = ['keyword_search', 'front_page_search', 'vector_search']
+PARSER_SUPPORTED_FILE_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'java', 'kt', 'js',
+                               'ts', 'css', 'scss', 'json', 'sql', 'vue']

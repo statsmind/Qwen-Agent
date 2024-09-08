@@ -48,6 +48,9 @@ def get_chat_model(cfg: Union[dict, str] = 'qwen-plus') -> BaseChatModel:
         **cfg
     }
 
+    if 'dashscope' not in cfg['model_server']:
+        cfg['model'] = os.environ.get("OPENAI_MODEL", "qwen2-72b-instruct")
+
     if 'model_type' in cfg:
         model_type = cfg['model_type']
         if model_type in LLM_REGISTRY:

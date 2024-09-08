@@ -96,7 +96,7 @@ class DocParser(BaseTool):
                 logger.warning(
                     f'Encountered ValueError raised by json5. Fall back to json. File: {cached_name_chunking}')
                 record = json.loads(record)
-            logger.info(f'Read chunked {url} from cache.')
+            logger.debug(f'Read chunked {url} from cache.')
             return record
         except KeyNotExistsError:
             doc = self.doc_extractor.call({'url': url})
@@ -111,7 +111,7 @@ class DocParser(BaseTool):
         else:
             title = get_basename_from_url(url)
 
-        logger.info(f'Start chunking {url} ({title})...')
+        logger.debug(f'Start chunking {url} ({title})...')
         time1 = time.time()
         if total_token <= max_ref_token:
             # The whole doc is one chunk
@@ -129,7 +129,7 @@ class DocParser(BaseTool):
             content = self.split_doc_to_chunk(doc, url, title=title, parser_page_size=parser_page_size)
 
         time2 = time.time()
-        logger.info(f'Finished chunking {url} ({title}). Time spent: {time2 - time1} seconds.')
+        logger.debug(f'Finished chunking {url} ({title}). Time spent: {time2 - time1} seconds.')
 
         # save the document data
         new_record = Record(url=url, raw=content, title=title).to_dict()
