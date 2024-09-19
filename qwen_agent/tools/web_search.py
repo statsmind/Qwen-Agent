@@ -7,6 +7,7 @@ import requests
 from qwen_agent.llm.schema import ContentItem
 from qwen_agent.tools import BaseTool
 from qwen_agent.tools.base import register_tool
+from qwen_agent.utils.utils import has_chinese_chars
 
 
 @register_tool("web_search")
@@ -36,7 +37,9 @@ class WebSearch(BaseTool):
         if not query:
             return []
 
-        payload = {"q": query, "gl": "cn", "hl": "zh-cn"}
+        payload = {"q": query, "num": 30, "gl": "cn", "hl": "zh-cn"}
+        if not has_chinese_chars(query):
+            payload = {"q": query, "num": 30, "gl": "en", "hl": "en-us"}
 
         date_range = params.get("date_range", "")
         if date_range in ["y", "m", "d"]:

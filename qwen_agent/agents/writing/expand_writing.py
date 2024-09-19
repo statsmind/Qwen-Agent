@@ -3,6 +3,7 @@ from typing import Iterator, List
 
 from qwen_agent import Agent
 from qwen_agent.llm.schema import CONTENT, Message
+from qwen_agent.utils.utils import extract_text_from_message
 
 PROMPT_TEMPLATE_ZH = """
 你是一个写作助手，任务是依据参考资料，完成写作任务。
@@ -13,13 +14,13 @@ PROMPT_TEMPLATE_ZH = """
 大纲是：
 {outline}
 
-此时你的任务是扩写第{index}个一级标题对应的章节：{capture}。注意每个章节负责撰写不同的内容，所以你不需要为了全面而涵盖之后的内容。请不要在这里生成大纲。只依据给定的参考资料来写，不要引入其余知识。
+此时你的任务是扩写第{index}个一级标题对应的章节：{capture}。注意每个章节负责撰写不同的内容，所以你不需要为了全面而涵盖之后的内容。请不要在这里生成大纲。只依据给定的参考资料来写，不要引入其余知识。请在章节的内容中加入引用锚点（格式为（作者，年份）），但不要在章节末尾添加参考文献列表。回复使用中文。
 """
 
 PROMPT_TEMPLATE_EN = """
-You are a writing assistant. Your task is to complete writing article based on reference materials.
+You are a writing assistant. Your task is to complete writing article based on reference papers.
 
-# References:
+# Reference papers:
 {ref_doc}
 
 The title is: {user_request}
@@ -28,7 +29,7 @@ The outline is:
 {outline}
 
 At this point, your task is to expand the chapter corresponding to the {index} first level title: {capture}.
-Note that each chapter is responsible for writing different content, so you don't need to cover the following content. Please do not generate an outline here. Write only based on the given reference materials and do not introduce other knowledge.
+Note that each chapter is responsible for writing different content, so you don't need to cover the following content. Please do not generate an outline here. Write only based on the given reference materials and do not introduce other knowledge. Add reference anchor (format as (auther, year)) to the content of chapter, don't add References list at the end of chapter.
 """
 
 PROMPT_TEMPLATE = {
@@ -51,7 +52,7 @@ class ExpandWriting(Agent):
         messages = copy.deepcopy(messages)
         prompt = PROMPT_TEMPLATE[lang].format(
             ref_doc=knowledge,
-            user_request=messages[-1][CONTENT],
+            user_request=extract_text_from_message(messages[-1]),
             index=index,
             outline=outline,
             capture=capture,

@@ -43,13 +43,13 @@ def get_chat_model(cfg: Union[dict, str] = 'qwen-plus') -> BaseChatModel:
 
     cfg = {
         "api_key": os.environ.get("OPENAI_API_KEY", ""),
-        "model_server": os.environ.get("OPENAI_BASE_URL", "dashscope"),
-        "model": os.environ.get("OPENAI_MODEL", "qwen2-72b-instruct"),
+        "model_server": "dashscope",
+        "model": "qwen2-72b-instruct",
         **cfg
     }
 
-    if 'dashscope' not in cfg['model_server']:
-        cfg['model'] = os.environ.get("OPENAI_MODEL", "qwen2-72b-instruct")
+    # cfg['model'] = "gpt-3.5-turbo"
+    # cfg['model_server'] = 'http://vllm.i.portal.clinify.cn'
 
     if 'model_type' in cfg:
         model_type = cfg['model_type']

@@ -46,8 +46,8 @@ CFGS = {
         },
         {
             'name': '张庭玮',
-            'description': '一位前端工程师',
-            'instructions': '项目目前使用的前端框架是 Vue.js，你的任务是根据功能需求和已有代码开发前端页面代码。',
+            'description': '一位前端开发工程师',
+            'instructions': '你的任务是根据功能需求和知识库中的代码提供前端页面代码。',
             'llm': {
                 'model': 'codeqwen1.5-7b-chat',
                 'generate_cfg': {
@@ -69,7 +69,7 @@ CFGS = {
         {
             'name': '李明明',
             'description': '一位后端工程师',
-            'instructions': '项目目前使用的后端框架是 spring boot，你的任务是根据功能需求和已有代码开发后端服务及接口代码。',
+            'instructions': '你的任务是根据功能需求和知识库中的代码提供后端服务及接口的代码。',
             'llm': {
                 'model': 'codeqwen1.5-7b-chat',
                 'generate_cfg': {

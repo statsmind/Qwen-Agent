@@ -3,6 +3,7 @@ from typing import Iterator, List
 
 from qwen_agent import Agent
 from qwen_agent.llm.schema import CONTENT, Message
+from qwen_agent.utils.utils import extract_text_from_message
 
 PROMPT_TEMPLATE_ZH = """
 你是一个写作助手，任务是充分理解参考资料，从而完成写作。
@@ -11,7 +12,7 @@ PROMPT_TEMPLATE_ZH = """
 
 写作标题是：{user_request}
 
-为了完成以上写作任务，请先列出大纲。回复只需包含大纲。大纲的一级标题全部以罗马数字计数。只依据给定的参考资料来写，不要引入其余知识。
+为了完成以上写作任务，请先列出大纲。回复只需包含大纲。大纲的一级标题全部以罗马数字计数。只依据给定的参考资料来写，不要引入其余知识。回复请用中文。
 """
 
 PROMPT_TEMPLATE_EN = """
@@ -35,8 +36,9 @@ class OutlineWriting(Agent):
 
     def _run(self, messages: List[Message], knowledge: str = '', lang: str = 'zh', **kwargs) -> Iterator[List[Message]]:
         messages = copy.deepcopy(messages)
+
         messages[-1][CONTENT] = PROMPT_TEMPLATE[lang].format(
             ref_doc=knowledge,
-            user_request=messages[-1][CONTENT],
+            user_request=extract_text_from_message(messages[-1]),
         )
         return self._call_llm(messages)

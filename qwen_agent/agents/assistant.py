@@ -15,23 +15,25 @@ KNOWLEDGE_TEMPLATE_ZH = """# 知识库
 
 {knowledge}"""
 
-KNOWLEDGE_TEMPLATE_EN = """# Knowledge Base
+KNOWLEDGE_TEMPLATE_EN = """# Reference papers
 
 {knowledge}"""
 
 KNOWLEDGE_TEMPLATE = {'zh': KNOWLEDGE_TEMPLATE_ZH, 'en': KNOWLEDGE_TEMPLATE_EN}
 
-KNOWLEDGE_SNIPPET_ZH = """## 来自 {source} 的内容：
+KNOWLEDGE_SNIPPET_ZH = """## 来自 ({source}) 的内容：
 
 ```
 {content}
-```"""
+```
+"""
 
-KNOWLEDGE_SNIPPET_EN = """## The content from {source}:
-
+KNOWLEDGE_SNIPPET_EN = """## The content from ({source}):
 ```
 {content}
-```"""
+```
+
+"""
 
 KNOWLEDGE_SNIPPET = {'zh': KNOWLEDGE_SNIPPET_ZH, 'en': KNOWLEDGE_SNIPPET_EN}
 

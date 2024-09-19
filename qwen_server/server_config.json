@@ -11,8 +11,8 @@
         "workstation_port": 7864,
         "model_server": "dashscope",
         "api_key": "",
-        "llm": "qwen-plus",
-        "max_ref_token": 4000,
+        "llm": "qwen2.5-72b-instruct",
+        "max_ref_token": 40000,
         "max_days": 7
     }
 }

@@ -417,7 +417,7 @@ def format_as_text_message(
 
 def extract_text_from_message(
     msg: Message,
-    add_upload_info: bool,
+    add_upload_info: bool = False,
     lang: Literal['auto', 'en', 'zh'] = 'auto',
 ) -> str:
     if isinstance(msg.content, list):

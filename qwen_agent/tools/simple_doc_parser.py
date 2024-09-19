@@ -4,6 +4,7 @@ import re
 import time
 from collections import Counter
 from typing import Dict, List, Optional, Union
+from readability import Document as RDocument
 
 import json5
 
@@ -189,12 +190,15 @@ def parse_html_bs(path: str, extract_image: bool = False):
     with open(path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f, **bs_kwargs)
 
-    text = soup.get_text()
+    rdoc = RDocument(soup.prettify())
+
+    # text = soup.get_text()
+    text = BeautifulSoup(rdoc.summary(), 'html.parser').get_text()
 
     if soup.title:
         title = str(soup.title.string)
     else:
-        title = ''
+        title = rdoc.title()
 
     text = pre_process_html(text)
     paras = text.split(PARAGRAPH_SPLIT_SYMBOL)

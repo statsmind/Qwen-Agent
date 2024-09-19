@@ -12,7 +12,6 @@ import tiktoken
 import uvicorn
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastchat.protocol.openai_api_protocol import ChatCompletionRequest
 from openai.types.chat import ChatCompletionChunk
 from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta
 from starlette.middleware.cors import CORSMiddleware

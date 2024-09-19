@@ -113,7 +113,7 @@ class DocParser(BaseTool):
 
         logger.debug(f'Start chunking {url} ({title})...')
         time1 = time.time()
-        if total_token <= max_ref_token:
+        if total_token <= max_ref_token and False:
             # The whole doc is one chunk
             content = [
                 Chunk(content=get_plain_doc(doc),

@@ -44,14 +44,14 @@ class VectorSearch(BaseSearch):
             for chk in doc.raw:
                 all_chunks.append(Document(page_content=chk.content[:2000], metadata=chk.metadata))
 
-        # embeddings = DashScopeEmbeddings(model='text-embedding-v2',
-        #                                  dashscope_api_key=os.getenv('DASHSCOPE_API_KEY', ''))
-        bge_embeddings = HuggingFaceBgeEmbeddings(
-            model_name='BAAI/bge-m3',
-            model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
-            encode_kwargs={'normalize_embeddings': True}
-        )
-        embeddings = CachedEmbeddings(bge_embeddings)
+        embeddings = DashScopeEmbeddings(model='text-embedding-v2',
+                                         dashscope_api_key=os.getenv('DASHSCOPE_API_KEY', ''))
+        # bge_embeddings = HuggingFaceBgeEmbeddings(
+        #     model_name='BAAI/bge-m3',
+        #     model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
+        #     encode_kwargs={'normalize_embeddings': True}
+        # )
+        # embeddings = CachedEmbeddings(bge_embeddings)
         db = FAISS.from_documents(all_chunks, embeddings)
         chunk_and_score = db.similarity_search_with_score(query, k=len(all_chunks))
 
