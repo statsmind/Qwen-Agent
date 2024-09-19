@@ -43,6 +43,12 @@ def get_chat_model(cfg: Union[dict, str] = 'qwen-plus') -> BaseChatModel:
     if 'model' not in cfg or not cfg['model']:
         cfg['model'] = 'qwen2-72b-instruct'
 
+    if cfg['model'] in ['qwen2-72b-instruct']:
+        if 'generate_cfg' not in cfg:
+            cfg['generate_cfg'] = {
+                'max_input_tokens': 128*1024,
+            }
+        
     if 'model_type' in cfg:
         model_type = cfg['model_type']
         if model_type in LLM_REGISTRY:

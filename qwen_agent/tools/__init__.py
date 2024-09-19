@@ -10,6 +10,8 @@ from .search_tools import FrontPageSearch, HybridSearch, KeywordSearch, VectorSe
 from .simple_doc_parser import SimpleDocParser
 from .storage import Storage
 from .web_extractor import WebExtractor
+from .web_searcher import WebSearcher
+from .pubmed_searcher import PubMedSearcher
 
 __all__ = [
     'BaseTool',
@@ -28,4 +30,6 @@ __all__ = [
     'FrontPageSearch',
     'ExtractDocVocabulary',
     'PythonExecutor',
+    'WebSearcher',
+    'PubMedSearcher'
 ]

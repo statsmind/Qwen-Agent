@@ -28,6 +28,13 @@ def register_tool(name, allow_overwrite=False):
     return decorator
 
 
+def load_tool(name, cfg: Optional[dict] = None):
+    if name in TOOL_REGISTRY:
+        return TOOL_REGISTRY[name](cfg)
+    else:
+        return None
+
+
 def is_tool_schema(obj: dict) -> bool:
     """
     Check if obj is a valid JSON schema describing a tool compatible with OpenAI's tool calling.

@@ -39,7 +39,7 @@ class WebSearcher(BaseTool):
         "credits": 2
     }
 
-    def call(self, params: Union[str, dict], **kwargs) -> str:
+    def call(self, params: Union[str, dict], **kwargs) -> dict:
         params = self._verify_json_format_args(params)
 
         serp_api_key = os.environ.get("SERP_API_KEY", "")
@@ -65,19 +65,8 @@ class WebSearcher(BaseTool):
                 ).json()
 
                 if 'organic' in response:
-                    return json.dumps(response, ensure_ascii=False)
+                    return response
             except:
                 pass
 
-        return json.dumps({**self.empty_response, "searchParameters": payload}, ensure_ascii=False)
-
-
-if __name__ == "__main__":
-    from qwen_agent.agents import Assistant
-
-    assistant = Assistant(
-        function_list=[WebSearcher()]
-    )
-
-    *_, response = assistant.run([Message('user', '安宫牛黄丸动物或临床研究的证据')])
-    print(response)
+        return {**self.empty_response, "searchParameters": payload}
