@@ -4,7 +4,7 @@ from typing import Union, List
 
 import requests
 
-from qwen_agent.llm.schema import ContentItem
+from qwen_agent.llm.schema import ContentItem, Message
 from qwen_agent.tools import BaseTool
 from qwen_agent.tools.base import register_tool
 from qwen_agent.utils.utils import has_chinese_chars
@@ -73,5 +73,11 @@ class WebSearcher(BaseTool):
 
 
 if __name__ == "__main__":
-    web_searcher = WebSearcher()
-    print(web_searcher.call({"query": "普林斯顿大学"}))
+    from qwen_agent.agents import Assistant
+
+    assistant = Assistant(
+        function_list=[WebSearcher()]
+    )
+
+    *_, response = assistant.run([Message('user', '安宫牛黄丸动物或临床研究的证据')])
+    print(response)

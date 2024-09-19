@@ -35,8 +35,13 @@ def get_chat_model(cfg: Union[dict, str] = 'qwen-plus') -> BaseChatModel:
     Returns:
         LLM object.
     """
-    if isinstance(cfg, str):
+    if cfg is None:
+        cfg = {'model': 'qwen2-72b-instruct'}
+    elif isinstance(cfg, str):
         cfg = {'model': cfg}
+
+    if 'model' not in cfg or not cfg['model']:
+        cfg['model'] = 'qwen2-72b-instruct'
 
     if 'model_type' in cfg:
         model_type = cfg['model_type']

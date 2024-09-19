@@ -37,7 +37,7 @@ class Agent(ABC):
             name: The name of this agent.
             description: The description of this agent, which will be used for multi_agent.
         """
-        if isinstance(llm, dict):
+        if not llm or isinstance(llm, dict):
             self.llm = get_chat_model(llm)
         else:
             self.llm = llm
