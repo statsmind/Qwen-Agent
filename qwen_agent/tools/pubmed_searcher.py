@@ -41,6 +41,7 @@ class PubMedSearcher(BaseTool):
         for paper in PubMed().query(query, max_results=max_results):
             paper = paper.toDict()
             paper['publication_date'] = str(paper['publication_date'])
+            paper['year'] = paper['publication_date'][:4]
 
             for field in ['pubmed_id', 'doi']:
                 if field in paper and paper[field]:
@@ -52,7 +53,20 @@ class PubMedSearcher(BaseTool):
                 else:
                     paper[field] = None
 
-            del paper['xml']
+            if 'authors' in paper:
+                paper['authors'] = [f"{author['firstname']} {author['lastname']} " for author in paper['authors']]
+            else:
+                paper['authors'] = []
+
+            if len(paper['authors']) > 0:
+                paper['first_author'] = paper['authors'][0]
+            else:
+                paper['first_author'] = " "
+
+            for field in ['xml', 'copyrights']:
+                if field in paper:
+                    del paper[field]
+
             papers.append(paper)
 
         return papers

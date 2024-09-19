@@ -223,9 +223,12 @@ def get_content_type_by_head_request(path: str) -> str:
         return 'unk'
 
 
-def get_file_type(path: str) -> Literal['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'unk']:
-    f_type = get_basename_from_url(path).split('.')[-1].lower()
-    if f_type in ['pdf', 'docx', 'pptx', 'csv', 'tsv', 'xlsx', 'xls']:
+def get_file_type(path: str) -> Literal['pdf', 'docx', 'pptx', 'txt', 'html', 'csv', 'tsv', 'xlsx', 'xls', 'unk', 'local']:
+    if path.startswith("kb:"):
+        f_type = 'local'
+    else:
+        f_type = get_basename_from_url(path).split('.')[-1].lower()
+    if f_type in ['pdf', 'docx', 'pptx', 'csv', 'tsv', 'xlsx', 'xls', 'local']:
         # Specially supported file types
         return f_type
 

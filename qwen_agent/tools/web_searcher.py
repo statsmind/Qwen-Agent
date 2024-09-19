@@ -12,13 +12,21 @@ from qwen_agent.utils.utils import has_chinese_chars
 
 @register_tool("web_searcher")
 class WebSearcher(BaseTool):
-    description = '根据关键字搜索相关网页'
+    description = 'web search'
     parameters = [
         {
             'name': 'query',
             'type': 'string',
-            'description': '搜索关键字',
+            'description': 'search keywords',
             'required': True
+        },
+        {
+            'name': 'lang',
+            'type': 'string',
+            'description': 'the language',
+            "enum": ["en", "zh", "auto"],
+            "default": "auto",
+            'required': False
         },
         {
             'name': 'date_range',
@@ -47,8 +55,10 @@ class WebSearcher(BaseTool):
             raise ValueError("SERP_API_KEY env variable not set")
 
         query = params.get("query", "").strip()
+        lang = params.get("lang", "auto")
+
         payload = {"q": query, "num": 30, "gl": "cn", "hl": "zh-cn"}
-        if not has_chinese_chars(query):
+        if lang == 'en' or (lang == 'auto' and not has_chinese_chars(query)):
             payload['gl'] = 'en'
             payload['hl'] = 'en-us'
 
