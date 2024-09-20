@@ -42,7 +42,7 @@ class Memory(Agent):
         self.cfg = rag_cfg or {}
 
         if 'max_ref_token' not in self.cfg:
-            if self.llm.model in ['qwen2-72b-instruct', 'qwen2.5-72b-instruct']:
+            if llm.model in ['qwen2-72b-instruct', 'qwen2.5-72b-instruct']:
                 self.cfg['max_ref_token'] = 20000
 
         self.max_ref_token: int = self.cfg.get('max_ref_token', DEFAULT_MAX_REF_TOKEN)
