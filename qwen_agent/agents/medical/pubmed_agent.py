@@ -61,7 +61,10 @@ class PubMedAgent(Assistant):
             }])
             kb_files.append(kb_file_id)
 
-        assistant = Assistant(files=kb_files)
+        assistant = Assistant(files=kb_files, rag_cfg={
+            "rag_searchers": ['keyword_search', 'vector_search'],
+            "max_ref_token": 40000,
+        })
 
         response = []
         for rsp in assistant.run(messages, lang=lang, **kwargs):
