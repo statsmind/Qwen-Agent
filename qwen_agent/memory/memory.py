@@ -40,6 +40,11 @@ class Memory(Agent):
               And the above is the default settings.
         """
         self.cfg = rag_cfg or {}
+
+        if 'max_ref_token' not in self.cfg:
+            if self.llm.model in ['qwen2-72b-instruct', 'qwen2.5-72b-instruct']:
+                self.cfg['max_ref_token'] = 20000
+
         self.max_ref_token: int = self.cfg.get('max_ref_token', DEFAULT_MAX_REF_TOKEN)
         self.parser_page_size: int = self.cfg.get('parser_page_size', DEFAULT_PARSER_PAGE_SIZE)
         self.rag_searchers = self.cfg.get('rag_searchers', DEFAULT_RAG_SEARCHERS)
