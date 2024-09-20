@@ -39,7 +39,7 @@ class VectorSearch(BaseSearch):
             for chk in doc.raw:
                 all_chunks.append(Document(page_content=chk.content[:2000], metadata=chk.metadata))
 
-        embeddings = DashScopeEmbeddings(model='text-embedding-v1',
+        embeddings = DashScopeEmbeddings(model='text-embedding-v3',
                                          dashscope_api_key=os.getenv('DASHSCOPE_API_KEY', ''))
         db = FAISS.from_documents(all_chunks, embeddings)
         chunk_and_score = db.similarity_search_with_score(query, k=len(all_chunks))
