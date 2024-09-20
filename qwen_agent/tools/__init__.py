@@ -12,6 +12,7 @@ from .storage import Storage
 from .web_extractor import WebExtractor
 from .web_searcher import WebSearcher
 from .pubmed_searcher import PubMedSearcher
+from .video_searcher import VideoSearcher
 
 __all__ = [
     'BaseTool',
@@ -31,5 +32,6 @@ __all__ = [
     'ExtractDocVocabulary',
     'PythonExecutor',
     'WebSearcher',
-    'PubMedSearcher'
+    'PubMedSearcher',
+    'VideoSearcher'
 ]
