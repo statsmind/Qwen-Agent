@@ -20,6 +20,7 @@ class FnCallAgent(Agent):
                  name: Optional[str] = None,
                  description: Optional[str] = None,
                  files: Optional[List[str]] = None,
+                 dump_formats: Optional[List[str]] = None,
                  **kwargs):
         """Initialization the agent.
 
@@ -37,7 +38,9 @@ class FnCallAgent(Agent):
                          llm=llm,
                          system_message=system_message,
                          name=name,
-                         description=description)
+                         description=description,
+                         dump_formats=dump_formats,
+                         **kwargs)
 
         if not hasattr(self, 'mem'):
             # Default to use Memory to manage files

@@ -1,0 +1,12 @@
+.role-user {
+  font-weight: bold;
+  padding: 10px 0 10px;
+  margin: 10px 0 10px;
+}
+
+.role-assistant {
+  font-family: monospace;
+  background-color: #dddddd;
+  padding: 10px;
+  margin: 10px 0 10px;
+}
