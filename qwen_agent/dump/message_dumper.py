@@ -14,7 +14,7 @@ class MessageDumper(object):
         self.step_messages: List[Union[Dict, Message]] = []
 
         session_id = uuid.uuid4().hex
-        base_path = os.path.join(f"d:\\temp\\qwen_agent\\{session_id}")
+        base_path = os.path.join(os.getenv("HOME"), f".qwen_agent/{session_id}")
         os.makedirs(os.path.dirname(base_path), exist_ok=True)
 
         if 'jsonl' in output_formats:

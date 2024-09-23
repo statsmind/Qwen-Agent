@@ -56,6 +56,9 @@ class FnCallAgent(Agent):
             extra_generate_cfg = {'lang': lang}
             if kwargs.get('seed') is not None:
                 extra_generate_cfg['seed'] = kwargs['seed']
+            if kwargs.get('stop') is not None:
+                extra_generate_cfg['stop'] = kwargs['stop']
+
             output_stream = self._call_llm(messages=messages,
                                            functions=[func.function for func in self.function_map.values()],
                                            extra_generate_cfg=extra_generate_cfg)

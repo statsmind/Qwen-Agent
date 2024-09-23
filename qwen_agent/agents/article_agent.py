@@ -15,25 +15,26 @@ class ArticleAgent(Assistant):
     def _run(self,
              messages: List[Message],
              lang: str = 'en',
-             full_article: bool = False,
+             full_article: bool = True,
              **kwargs) -> Iterator[List[Message]]:
 
         # Need to use Memory agent for data management
-        *_, last = self.mem.run(messages=messages, **kwargs)
-        _ref = last[-1][CONTENT]
+        new_messages = self._prepend_knowledge_prompt(messages=messages, lang=lang, knowledge='', **kwargs)
+        # *_, last = self.mem.run(messages=messages, **kwargs)
+        # _ref = last[-1][CONTENT]
 
         response = []
-        if _ref:
-            response.append(Message(ASSISTANT, f'>\n> Search for relevant information: \n{_ref}\n'))
-            yield response
+        # if _ref:
+        #     response.append(Message(ASSISTANT, f'>\n> Search for relevant information: \n{_ref}\n'))
+        #     yield response
 
         if full_article:
-            writing_agent = WriteFromScratch(llm=self.llm)
+            writing_agent = WriteFromScratch(llm=self.llm, dump_formats=self.dump_formats)
         else:
-            writing_agent = ContinueWriting(llm=self.llm)
+            writing_agent = ContinueWriting(llm=self.llm, dump_formats=self.dump_formats)
             response.append(Message(ASSISTANT, '>\n> Writing Text: \n'))
             yield response
 
-        for rsp in writing_agent.run(messages=messages, lang=lang, knowledge=_ref):
+        for rsp in writing_agent.run(messages=new_messages, lang=lang, knowledge=''):
             if rsp:
                 yield response + rsp

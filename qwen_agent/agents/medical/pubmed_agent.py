@@ -10,7 +10,7 @@ from qwen_agent.llm import BaseChatModel
 from qwen_agent.llm.schema import ASSISTANT, CONTENT, Message, DEFAULT_SYSTEM_MESSAGE
 from qwen_agent.tools import BaseTool, PubMedSearcher, WebSearcher
 from qwen_agent.tools.doc_parser import Record, Chunk
-from qwen_agent.utils.local_knowledge_base import LocalKnowledgeBase
+from qwen_agent.utils.global_knowledge_base import GlobalKnowledgeBase
 from qwen_agent.utils.tokenization_qwen import count_tokens
 
 
@@ -25,7 +25,7 @@ class PubMedAgent(Assistant):
         keywords = json.loads(last[0].content)
 
         pubmed_searcher = PubMedSearcher()
-        local_kb = LocalKnowledgeBase()
+        local_kb = GlobalKnowledgeBase()
         web_searcher = WebSearcher()
         assistant = Assistant(llm=self.llm)
 

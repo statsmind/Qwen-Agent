@@ -54,6 +54,7 @@ class Agent(ABC):
             self.dumper = MessageDumper(dump_formats)
         else:
             self.dumper = DummyDumper(dump_formats)
+        self.dump_formats = dump_formats
 
         self.system_message = system_message
         self.name = name

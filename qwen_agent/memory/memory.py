@@ -12,6 +12,7 @@ from qwen_agent.settings import (DEFAULT_MAX_REF_TOKEN, DEFAULT_PARSER_PAGE_SIZE
                                  DEFAULT_RAG_SEARCHERS)
 from qwen_agent.tools import BaseTool
 from qwen_agent.tools.simple_doc_parser import PARSER_SUPPORTED_FILE_TYPES
+from qwen_agent.utils.tokenization_qwen import count_tokens
 from qwen_agent.utils.utils import extract_files_from_messages, extract_text_from_message, get_file_type
 
 
