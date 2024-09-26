@@ -15,7 +15,7 @@ PROMPT_TEMPLATE_ZH = """
 """
 
 PROMPT_TEMPLATE_EN = """
-You are a writing assistant. Your task is to complete writing article based on reference materials.
+You are a writing assistant. Your task is to complete writing SCI paper based on reference materials.
 
 # References:
 {ref_doc}

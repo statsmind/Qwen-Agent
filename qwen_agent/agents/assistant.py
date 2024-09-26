@@ -53,6 +53,8 @@ def format_knowledge_to_source_and_content(result: Union[str, List[dict]]) -> Li
         assert isinstance(docs, list)
         for doc in docs:
             url, snippets = doc['url'], doc['text']
+            if isinstance(snippets, str):
+                snippets = [snippets]
             assert isinstance(snippets, list)
             _tmp_knowledge.append({
                 'source': f'[文件]({get_basename_from_url(url)})',
@@ -76,7 +78,7 @@ class Assistant(FnCallAgent):
                  description: Optional[str] = None,
                  files: Optional[List[str]] = None,
                  rag_cfg: Optional[Dict] = None,
-                 dump_formats: Optional[List[str]] = None,
+                 record_formats: Optional[List[str]] = None,
                  **kwargs):
         super().__init__(function_list=function_list,
                          llm=llm,
@@ -85,7 +87,7 @@ class Assistant(FnCallAgent):
                          description=description,
                          files=files,
                          rag_cfg=rag_cfg,
-                         dump_formats=dump_formats,
+                         record_formats=record_formats,
                          **kwargs)
 
     def _run(self,

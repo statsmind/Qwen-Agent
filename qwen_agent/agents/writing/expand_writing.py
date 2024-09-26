@@ -20,11 +20,12 @@ PROMPT_TEMPLATE_ZH = """
 
 
 此时你的任务是扩写第{index}个一级标题对应的章节：{capture}。注意每个章节负责撰写不同的内容，所以你不需要为了全面而涵盖之后的内容，但是内容一定要详细，不要担心字数限制。请不要在这里生成大纲。只依据给定的参考资料来写，不要引入其余知识。
-在章节内容的适当位置添加文献引用标记，引用标记使用markdown格式: [数字], 比如[1]，如果有多个，逗号隔开，比如 [1,15]。在每个章节末尾使用SCI格式列出所引用的参考文献。
+以 [number] 格式向章节添加引用锚点，例如 [1]、[2,3]。每章中的数字应以 1 开头，且不超过 3 个数字。在本章末尾列出所有被引的论文，遵循 SCI 格式。
+您应该具有批判性和创新思维，而不仅仅是从知识库中复制内容。
 """
 
 PROMPT_TEMPLATE_EN = """
-You are a writing assistant. Your task is to complete writing article based on reference materials.
+You are a writing assistant. Your task is to complete writing SCI paper based on reference materials.
 
 # References:
 {ref_doc}
@@ -35,7 +36,9 @@ The outline is:
 {outline}
 
 At this point, your task is to expand the chapter corresponding to the {index} first level title: {capture}.
-Note that each chapter is responsible for writing different content, so you don't need to cover the following content. Please do not generate an outline here. Write only based on the given reference materials and do not introduce other knowledge.
+Note that each chapter is responsible for writing different content, so you don't need to cover the following content. Please do not generate an outline here. Write only based on the given reference materials and do not introduce other knowledge and dot not make up data.
+Add reference anchors to the chapter in the format of [number], example [1], [2,3]. The number should start with 1 in each chapter, and no more than 3 numbers. List all cited papers at the end of the chapter, following the SCI format.
+You should have critical and innovative thinking, not just copy content from knowledge base.
 """
 
 PROMPT_TEMPLATE = {

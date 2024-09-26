@@ -19,7 +19,7 @@ def app_gui():
                     files=[
                         r'C:\Users\james\Documents\you-et-al-2024-twenty-four-hour-post-thrombolysis-nihss-score-as-the-strongest-prognostic-predictor-after-acute.pdf'
                     ],
-                    dump_formats=['jsonl', 'html']
+                    record_formats=['jsonl', 'html']
                     )
     chatbot_config = {
         'prompt.suggestions': [

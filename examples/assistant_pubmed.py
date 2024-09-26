@@ -6,10 +6,12 @@ from qwen_agent.gui import WebUI
 
 
 def app_test():
-    bot = PubMedAgent(llm={'model': 'qwen2-72b-instruct'})
-    messages = [{'role': 'user', 'content': [{'text': '介绍图一'}, {'file': 'https://arxiv.org/pdf/1706.03762.pdf'}]}]
+    bot = Assistant(llm={'model': 'qwen2.5-72b-instruct'}, files=['f:\\resources\\stroke\\30355212.pdf'])
+    messages = [{'role': 'user', 'content': 'Moyamoya病占儿童卒中的比例'}]
     for rsp in bot.run(messages):
         print(rsp)
+
+
 
 def app_gui():
     # Define the agent
@@ -17,7 +19,7 @@ def app_gui():
                       name='PUBMED助手',
                       description='使用PubMED检索并回答',
                       system_message="You are helpful assistant. When you answer my question, please add reference anchor to your reply and append References list to the end.",
-                      dump_formats=['jsonl', 'html'])
+                      record_formats=['jsonl', 'html'])
     chatbot_config = {
         'prompt.suggestions': [
             {
@@ -35,5 +37,5 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    # app_test()
-    app_gui()
+    app_test()
+    # app_gui()

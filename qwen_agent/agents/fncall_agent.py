@@ -20,7 +20,7 @@ class FnCallAgent(Agent):
                  name: Optional[str] = None,
                  description: Optional[str] = None,
                  files: Optional[List[str]] = None,
-                 dump_formats: Optional[List[str]] = None,
+                 record_formats: Optional[List[str]] = None,
                  **kwargs):
         """Initialization the agent.
 
@@ -39,7 +39,7 @@ class FnCallAgent(Agent):
                          system_message=system_message,
                          name=name,
                          description=description,
-                         dump_formats=dump_formats,
+                         record_formats=record_formats,
                          **kwargs)
 
         if not hasattr(self, 'mem'):

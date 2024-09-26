@@ -4,7 +4,7 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Iterator, List, Optional, Tuple, Union, Literal
 
-from qwen_agent.dump.message_dumper import MessageDumper, DummyDumper
+from qwen_agent.recorder.message_recorder import MessageRecorder
 from qwen_agent.llm import get_chat_model
 from qwen_agent.llm.base import BaseChatModel
 from qwen_agent.llm.schema import CONTENT, DEFAULT_SYSTEM_MESSAGE, ROLE, SYSTEM, ContentItem, Message
@@ -26,7 +26,7 @@ class Agent(ABC):
                  system_message: Optional[str] = DEFAULT_SYSTEM_MESSAGE,
                  name: Optional[str] = None,
                  description: Optional[str] = None,
-                 dump_formats: List[Literal['jsonl', 'html']] = None,
+                 record_formats: List[Literal['jsonl', 'html']] = None,
                  **kwargs):
         """Initialization the agent.
 
@@ -50,11 +50,7 @@ class Agent(ABC):
             for tool in function_list:
                 self._init_tool(tool)
 
-        if dump_formats is not None and len(dump_formats) > 0:
-            self.dumper = MessageDumper(dump_formats)
-        else:
-            self.dumper = DummyDumper(dump_formats)
-        self.dump_formats = dump_formats
+        self.recorder = MessageRecorder(record_formats)
 
         self.system_message = system_message
         self.name = name
@@ -93,27 +89,26 @@ class Agent(ABC):
                 new_messages.append(msg)
                 _return_message_type = 'message'
 
-        self.dumper.start_loop(new_messages[-1])
-
         if 'lang' not in kwargs:
             if has_chinese_messages(new_messages):
                 kwargs['lang'] = 'zh'
             else:
                 kwargs['lang'] = 'en'
 
+        self.recorder.start(new_messages[-1])
+        rsp = []
         for rsp in self._run(messages=new_messages, **kwargs):
+            self.recorder.step(rsp)
             for i in range(len(rsp)):
                 if not rsp[i].name and self.name:
                     rsp[i].name = self.name
-
-            self.dumper.step(rsp)
 
             if _return_message_type == 'message':
                 yield [Message(**x) if isinstance(x, dict) else x for x in rsp]
             else:
                 yield [x.model_dump() if not isinstance(x, dict) else x for x in rsp]
 
-        self.dumper.end_loop()
+        self.recorder.step(rsp, is_final=True)
 
     @abstractmethod
     def _run(self, messages: List[Message], lang: str = 'en', **kwargs) -> Iterator[List[Message]]:

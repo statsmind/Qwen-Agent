@@ -36,6 +36,7 @@ class PubMedSearcher(BaseTool):
 
         query = params.get("query", "").strip()
         max_results = int(params.get("max_results", self.DEFAULT_MAX_RESULTS))
+        max_results = 25
 
         papers = []
         for paper in PubMed().query(query, max_results=max_results):
