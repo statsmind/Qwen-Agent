@@ -40,7 +40,20 @@ class MessageRecorder(object):
                 logger.info(f"Writing html file {base_path + '.html'}")
 
                 css_content = open(os.path.join(os.path.dirname(__file__), 'assets/style.css'), 'r', encoding="utf-8").read()
-                self.html_fp.write(f"""<html>\n<head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0"/><meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1"/><meta http-equiv="Cache-Control" content="no-siteapp"/><meta http-equiv="Cache-Control" content="no-transform"/>\n<style>\n{css_content}\n</style></head>\n<body>\n""")
+                self.html_fp.write(f"""
+<html>
+<head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <meta http-equiv="Cache-Control" content="no-transform"/>
+    <style>
+    {css_content}
+    </style>
+</head>
+<body>
+""")
 
     def start(self, message: Union[Dict, Message]):
         self._reset()
