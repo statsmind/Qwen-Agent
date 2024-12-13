@@ -37,19 +37,18 @@ class ArticleAgent(Assistant):
 
     def _run(self,
              messages: List[Message],
-             lang: str = 'en',
+             lang: str = 'zh',
              full_article: bool = True,
              **kwargs) -> Iterator[List[Message]]:
 
         # Need to use Memory agent for data management
-        # new_messages = self._prepend_knowledge_prompt(messages=messages, lang=lang, knowledge='', **kwargs)
-        # *_, last = self.mem.run(messages=messages, **kwargs)
-        # _ref = last[-1][CONTENT]
+        *_, last = self.mem.run(messages=messages, **kwargs)
+        _ref = last[-1][CONTENT]
 
         response = []
-        # if _ref:
-        #     response.append(Message(ASSISTANT, f'>\n> Search for relevant information: \n{_ref}\n'))
-        #     yield response
+        if _ref:
+            response.append(Message(ASSISTANT, f'>\n> Search for relevant information: \n{_ref}\n'))
+            yield response
 
         if full_article:
             writing_agent = WriteFromScratch(llm=self.llm)
@@ -58,6 +57,6 @@ class ArticleAgent(Assistant):
             response.append(Message(ASSISTANT, '>\n> Writing Text: \n'))
             yield response
 
-        for rsp in writing_agent.run(messages=messages, lang=lang, knowledge=self.knowledge):
+        for rsp in writing_agent.run(messages=messages, lang=lang, knowledge=_ref):
             if rsp:
                 yield response + rsp

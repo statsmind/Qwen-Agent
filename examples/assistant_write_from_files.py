@@ -113,14 +113,14 @@ def app_gui():
     #     files.append(global_kb.add_knowledge(content))
 
     # bot = ArticleAgent(llm={'model': 'qwen2-72b-instruct'}, record_formats=['html'])
-    files = [entry.path for entry in os.scandir(r"f:\resources\stroke")]
+    files = [entry.path for entry in os.scandir(r"D:\Temp\羌族")]
     bot = WriteFromFiles(
         llm={
             'model': 'qwen2-72b-instruct',
             'generate_cfg': {
                 'presence_penalty': 1.5,
                 'frequency_penalty': 1.5,
-                "max_input_tokens": 84800
+                "max_input_tokens": 160800
             }
         },
         files=files,
@@ -129,7 +129,7 @@ def app_gui():
     chatbot_config = {
         'prompt.suggestions': [
             {
-                'text': '儿童卒中研究现状及发展综述'
+                'text': '我的论文题目是"羌族释比艺术研究",你的身份是艺术学理论专家，请参考文献，梳理关于列维斯特劳斯在不同时期学术背景下，对他核心概念的理解，结合羌族原始宗教艺术——释比艺术，从人类学的视角分析羌族释比艺术的形成、文化内涵、艺术特征。'
             },
             {
                 'text': 'a summary of the current status and development trends in pediatric stroke research'

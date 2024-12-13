@@ -76,8 +76,11 @@ class Retrieval(BaseTool):
             files = json5.loads(files)
         records = []
         for file in files:
-            _record = self.doc_parse.call(params={'url': file}, **kwargs)
-            records.append(_record)
+            try:
+                _record = self.doc_parse.call(params={'url': file}, **kwargs)
+                records.append(_record)
+            except Exception as e:
+                print(e)
 
         query = params.get('query', '')
         if records:

@@ -7,6 +7,7 @@ import requests
 from qwen_agent.llm.schema import ContentItem, Message
 from qwen_agent.tools import BaseTool
 from qwen_agent.tools.base import register_tool
+from qwen_agent.utils.cache import Cache
 from qwen_agent.utils.utils import has_chinese_chars
 
 
@@ -47,7 +48,7 @@ class WebSearcher(BaseTool):
         "credits": 2
     }
 
-    def call(self, params: Union[str, dict], **kwargs) -> dict:
+    def call(self, params: Union[str, dict], num_results: int = 30, cache: bool = True, **kwargs) -> List:
         params = self._verify_json_format_args(params)
 
         serp_api_key = os.environ.get("SERP_API_KEY", "")
@@ -57,7 +58,7 @@ class WebSearcher(BaseTool):
         query = params.get("query", "").strip()
         lang = params.get("lang", "auto")
 
-        payload = {"q": query, "num": 30, "gl": "cn", "hl": "zh-cn"}
+        payload = {"q": query, "num": num_results, "gl": "cn", "hl": "zh-cn"}
         if lang == 'en' or (lang == 'auto' and not has_chinese_chars(query)):
             payload['gl'] = 'en'
             payload['hl'] = 'en-us'
@@ -68,6 +69,14 @@ class WebSearcher(BaseTool):
                 payload["tbs"] = f"qdr:{date_range}"
 
             payload = json.dumps(payload, ensure_ascii=False)
+
+            cache_api = Cache("web_searcher") if cache else None
+            if cache_api is not None:
+                content = cache_api.get(payload)
+                if content is not None:
+                    response = json.loads(content)
+                    return [item['link'] for item in response['organic']]
+
             headers = {'X-API-KEY': serp_api_key, 'Content-Type': 'application/json'}
             try:
                 response: dict = requests.request(
@@ -75,8 +84,12 @@ class WebSearcher(BaseTool):
                 ).json()
 
                 if 'organic' in response:
-                    return response
+                    if cache_api is not None:
+                        cache_api.put(payload, json.dumps(response, ensure_ascii=False))
+
+                    return [item['link'] for item in response['organic']]
             except:
                 pass
 
-        return {**self.empty_response, "searchParameters": payload}
+        #return {**self.empty_response, "searchParameters": payload}
+        return []
