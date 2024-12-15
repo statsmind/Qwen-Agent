@@ -14,7 +14,7 @@ def image_gen(prompt: str) -> str:
     return image_url
 
 
-def test():
+def app_test():
     # Config for the model
     llm_cfg_oai = {
         # Using Qwen2-VL deployed at any openai-compatible service such as vLLM:
@@ -93,4 +93,4 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    app_test()

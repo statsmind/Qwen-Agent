@@ -2,7 +2,7 @@ from qwen_agent.agents import Assistant
 from qwen_agent.gui import WebUI
 
 
-def test():
+def app_test():
     bot = Assistant(llm={'model': 'qwen2-72b-instruct'})
     messages = [{'role': 'user', 'content': [{'text': '介绍图一'}, {'file': 'https://arxiv.org/pdf/1706.03762.pdf'}]}]
     for rsp in bot.run(messages):

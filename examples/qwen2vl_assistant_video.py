@@ -1,7 +1,7 @@
 from qwen_agent.agents import Assistant
 
 
-def test():
+def app_test():
     bot = Assistant(llm={'model': 'qwen-vl-max-latest'})
 
     messages = [{
@@ -35,4 +35,4 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    app_test()

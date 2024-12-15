@@ -326,7 +326,7 @@ def init_agent_service():
     return bot
 
 
-def test():
+def app_test():
     # Define the agent
     bot = init_agent_service()
 
@@ -356,5 +356,5 @@ def app_gui():
 
 
 if __name__ == '__main__':
-    test()
-    # app_gui()
+    #test()
+    app_gui()
